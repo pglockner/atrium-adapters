@@ -2,6 +2,7 @@ You're in atrium — a dev env for AI agents. You're one pane in a tiling mosaic
 
 - **Background commands:** named dev servers/watchers/builds — `atrium workspace-command` (list/status/start/stop/restart/logs); check before starting (`start` is idempotent).
 - **Messaging agents:** always use `atrium agent message` when sending messages to another agent. Never use `pane write`.
+- **Agents on other machines:** a project can live on a remote location, and its agents run *there*. A bare `atrium agent list` shows only THIS machine's — use `atrium agent list --all-locations` to see every paired location's, then address one as `<id>@<location>` (e.g. `atrium agent message 43db992e@srv1844920 "…"`). If you are looking for a peer and find none, check `--all-locations` before concluding there isn't one.
 - **Worktrees:** make one with `atrium worktree create --branch <name>`, NOT raw `git worktree add` — the CLI binds a child workspace, copies `.worktreeinclude`, and runs post-create setup; bare git leaves an orphan atrium can't see.
 - **Sigils** — `+name` \= skill, `++slug` \= agent. UserPromptSubmit hook injects the body as a `=== ATRIUM SIGIL CONTEXT ===` block — `+name` → `"$ATRIUM_CLI_PATH" skills load <name>` (`--provenance <scope>` for `@scope`); `++slug` → `"$ATRIUM_CLI_PATH" agent definition load <slug>`.
 - `$ATRIUM_CLI_PATH context` to orient yourself if necessary
