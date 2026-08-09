@@ -31,7 +31,7 @@ Each bucket is one top-level verb. Run `<verb> --help` for its full surface.
 - **`workspace`** — List, create, switch, delete workspaces (project directories with their own pane layouts).
 - **`worktree`** — Create/list/remove git worktrees, each bound to its own child workspace. **Use `worktree create`, never raw `git worktree add`** — see **Worktrees** below.
 - **`workspace-command`** — The workspace's named background commands (dev server, watcher, etc.): list / status / start / stop / restart / logs / clear / create / edit / delete. **Check before you launch** — see **Workspace commands** below.
-- **`browser`** — Drive browser panes: navigate, click, fill, type, press, select, scroll, eval JS, screenshot, snapshot, wait, read attributes. Always prefer this over Playwright or any browser MCP.
+- **`browser`** — Drive browser panes: navigate, click, fill, type, press, select, scroll, eval JS, screenshot, snapshot, wait, read attributes. Always prefer this over Playwright or any browser MCP. Every verb works on a pane the user can't see — see **Never take the user's focus** below.
 - **`agent`** — List active agent panes and send framed messages between them. See **Agent-to-agent messaging** below.
 - **`theme`** — List and switch themes.
 - **`config`** — Read/write atrium settings.
@@ -70,14 +70,19 @@ If a prefix matches more than one ID, the CLI lists candidates and fails loudly 
 
 **"Room" not "tab" in user-facing text.** The backend still says `tab` internally; the user sees "room" everywhere. Narrate with "room".
 
-**Agent-to-agent messaging is framed and asynchronous.** `agent message <pane-id> "<text>"` wraps your text with sender identity and a reply command before injecting it into the recipient's stdin. Two consequences:
+**Agent-to-agent messaging is framed and asynchronous.** `agent message <pane-id> "<text>"` wraps your text with sender identity and a reply command before injecting it into the recipient's stdin. Three consequences:
 
 1. **Don't introduce yourself or paste reply instructions** — atrium does both. Just write the content.
 2. **Don't poll `pane read` for the reply.** When the other agent replies via `agent message`, atrium injects the framed reply into your stdin as a fresh turn. Send, end your turn, and wait — like messaging a human collaborator, not screen-scraping their terminal.
+3. **Pass `--no-reply` when you don't need one.** The default footer asks the recipient to reply, and they generally will — so a status update or a heads-up costs both of you a round trip you never wanted. `--no-reply` keeps your identity on the message but asks them not to message back; they still read it, act on it, and take their turn as normal, and the footer keeps your address for the case where it genuinely blocks them.
+
+   The test is not what kind of message it is — it's **do you need something back from them before you can proceed?** No → `--no-reply`. That covers status, steers, hints, corrections, heads-ups, and handoffs where they own the next step. Yes → default. Questions, requests, and anything you're about to wait on keep the reply hint.
 
 **Browser snapshot → ref → action loop.** Before you click/fill/type/select on a browser pane, run `browser snapshot <pane-id>` for an accessibility tree where each interactable has a short ref (`e1`, `e2`, …). Pass refs to `browser click`/`fill`/etc. Re-snapshot after the DOM changes — refs aren't stable across navigations.
 
-**`pane create --focus` is opt-in.** Only pass `--focus` when the user explicitly asked to reveal/switch to/focus the new pane. Otherwise omit it so it opens in the background without stealing focus.
+**Never take the user's focus.** Focusing a pane switches the user's room and takes their keyboard mid-sentence — they're usually typing to you while you work. It is opt-in everywhere for that reason: `pane create --focus`, `browser open --focus`, `agent launch --focus`, plus the explicit `pane focus` and `room switch`. Pass one of those ONLY when the user asked to be shown something.
+
+Nothing about driving a pane requires focus, so there's never an incidental reason to take it. Browser panes in particular: screenshots render from Chromium's own content model and a pane in another room is force-mounted offscreen on first use, so `snapshot` / `click` / `fill` / `screenshot` all work on a pane that was never visible. Don't focus a browser pane, or switch to its room, to drive it.
 
 **Adapter-side install/config is atrium's.** Don't hand-edit files under `~/.atrium/adapters/` or seed skills yourself — reinstall the adapter from Settings instead.
 
@@ -97,7 +102,11 @@ If a prefix matches more than one ID, the CLI lists candidates and fails loudly 
   --url "https://example.com" --split "$ATRIUM_PANE_ID"
 
 # Message another agent — then end your turn and wait for the reply.
-"$ATRIUM_CLI_PATH" agent message <agent-id-prefix> "Picking up ATR-12, taking the frontend half."
+"$ATRIUM_CLI_PATH" agent message <agent-id-prefix> "Can you take the backend half of ATR-12?"
+
+# One-way: you need nothing back, so don't make them reply.
+"$ATRIUM_CLI_PATH" agent message <agent-id-prefix> --no-reply \
+  "Heads up: I'm refactoring rowMediaMeasurement.ts, don't edit it for now."
 ```
 
 ## Task workflow
