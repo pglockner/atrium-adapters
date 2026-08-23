@@ -5,7 +5,7 @@
   "description": "Anthropic's AI coding assistant",
   "accent": "#d97757",
   "binary": "claude",
-  "version": "1.19.14",
+  "version": "1.19.15",
   "updateCommand": [
     "claude",
     "update"
@@ -29,7 +29,7 @@
       "postInstallAuth": true
     },
     "linux": {
-      "cmd": "npm install -g @anthropic-ai/claude-code",
+      "cmd": "npm install -g @anthropic-ai/claude-code || { echo \"atrium: npm global prefix not writable; retrying under ~/.local\"; npm install -g --prefix \"$HOME/.local\" @anthropic-ai/claude-code; }",
       "postInstallAuth": true
     },
     "windows": {

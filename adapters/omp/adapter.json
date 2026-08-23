@@ -2,10 +2,10 @@
   "sdkVersion": 2,
   "name": "omp",
   "displayName": "Oh My Pi",
-  "description": "Oh My Pi \u2014 extended pi-fork coding agent by can1357 (omp.sh)",
+  "description": "Oh My Pi — extended pi-fork coding agent by can1357 (omp.sh)",
   "accent": "#f97316",
   "binary": "omp",
-  "version": "16.4.7",
+  "version": "16.4.8",
   "updateCommand": [
     "omp",
     "update"
@@ -31,7 +31,7 @@
       "postInstallAuth": true
     },
     "linux": {
-      "cmd": "npm install -g bun @oh-my-pi/pi-coding-agent",
+      "cmd": "npm install -g bun @oh-my-pi/pi-coding-agent || { echo \"atrium: npm global prefix not writable; retrying under ~/.local\"; npm install -g --prefix \"$HOME/.local\" bun @oh-my-pi/pi-coding-agent; }",
       "postInstallAuth": true
     },
     "windows": {
