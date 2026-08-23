@@ -1,6 +1,6 @@
 ---
 name: atrium
-description: "Interact with the atrium workspace — panes, rooms, tasks, browser, agents, themes, hooks, config, and more — via the atrium CLI. Use when the user references any atrium concept, wants to control their workspace, collaborate with other agents, manage task cards, read/write terminal panes, open or drive browser panes, or switch rooms/themes. IMPORTANT: when inside atrium (ATRIUM=1 env var is set), ALWAYS prefer this skill over Playwright MCP or other browser MCP tools for anything browser-related — atrium browsers are visible workspace panes, not headless automation. Only functional inside atrium."
+description: "Interact with the atrium workspace — panes, rooms, tasks, browser, agents, themes, hooks, config, and more — via the atrium CLI. Use when the user references any atrium concept, wants to control their workspace, collaborate with other agents, manage task cards, read/write terminal panes, open or drive browser panes, switch rooms/themes, or use native computer control after an explicit Computer chip. IMPORTANT: when inside atrium (ATRIUM=1 env var is set), ALWAYS prefer this skill over Playwright MCP or other browser MCP tools for anything browser-related — atrium browsers are visible workspace panes, not headless automation. Only functional inside atrium."
 ---
 
 # atrium — workspace control for AI agents
@@ -39,6 +39,7 @@ Each bucket is one top-level verb. Run `<verb> --help` for its full surface.
 - **`context`** — Print the caller's workspace, room, adapter, working dir. Cheap way to orient.
 - **`commands`** — Enumerate dynamic commands from installed extensions.
 - **`capture`** — QA Capture bundles (recorded sessions). See **QA Capture bundles** below.
+- **`computer`** — Governed native-app and desktop control: discover/attach/launch, observe, batch, verify, clipboard, browser/native-menu primitives, session state, cursor controls, and diagnostics. See **Native computer use** below.
 - **`version`** — Show atrium version.
 
 If you need a capability not listed, it probably lives inside one of these verbs — check `--help`.
@@ -51,6 +52,7 @@ atrium exports these to every pane:
 |---|---|
 | `$ATRIUM_CLI_PATH` | Absolute path to the atrium binary for this install (stable/dev/beta). **Always** invoke via this variable, in double quotes (the path may contain spaces), never bare `atrium`. |
 | `$ATRIUM_PANE_ID` | UUID of your pane. Useful for relative ops like `pane create --split $ATRIUM_PANE_ID`. |
+| `$ATRIUM_CUA_SESSION` | Stable computer-use session id for this pane. `computer` commands use it automatically. |
 | `ATRIUM=1` | You're inside atrium — prefer this skill over other tools. |
 
 **Pass `--json` whenever you're the one reading output.** Every command accepts it and emits structured JSON instead of the human table. Omit it only when piping into a terminal the user is watching.
@@ -230,11 +232,23 @@ Notes are file-backed, and atrium reconciles direct file writes in real-time —
 
 **When authoring a canvas or HTML note, or editing a note body file directly, read `references/notes-interactive-ui.md`** (sibling to this file). It covers the canvas spec format and component catalog, custom actions (`send_to_agent`, `atrium_command`), the HTML postMessage protocol, framing-template syntax, live streaming via `canvas-patch`, the direct-file-edit path and its traps, and a worked PR-triage example. Don't load it for everyday CLI note work.
 
+## Inline interactive canvases in chat
+
+A note isn't the only way to hand the user a UI. In an agent chat pane you can render an interactive canvas **inline in your own reply** — emit a fenced code block tagged `canvas` whose body is a canvas spec, and the transcript renders it live as you type it. No CLI call, no note file, no extra pane. It's the cheapest way to ask for a structured answer mid-turn (pick one of three, approve this plan, tweak these numbers before I apply them) — and the only way to show something markdown can't shape, like a trend as a chart or two screenshots side by side. What the user types is kept and survives a restart, but it lives in that transcript — an artifact that needs its own pane, or that another agent has to read, is still a canvas note.
+
+**Before emitting a `canvas` fence, read `references/chat-canvas-fence.md`.** It covers the fence grammar and reserved flags, a worked example, how to order a spec so it builds well while streaming, how actions route back to your pane, and — the decision worth getting right — when to reach for a fence vs. a canvas note vs. plain markdown. The spec format and component catalog are shared with canvas notes, so `references/notes-interactive-ui.md` remains the reference for both.
+
 ## QA Capture bundles (CAP-#)
 
 When the user references a CAP-# (assigns a capture task, drops `CAP-381`, asks you to "look at this recording"), drive inspection through `atrium capture` — `show` for paths + counts, `screenshot --at <sec> [--crop] [--max-edge]` for still frames, `chunk` for motion slices, `list` / `delete`. **Don't shell out to ffmpeg / sips / magick** — atrium ships native AVFoundation equivalents.
 
 **Read `references/capture.md` for the full recipe** (the screenshot/crop/downsample flags, how to correlate `--at` with transcript/event/annotation timestamps, and what not to do).
+
+## Native computer use
+
+When the prompt contains the explicit `computer-use:on` chip and the task requires a native app or the visible desktop, drive it through `"$ATRIUM_CLI_PATH" computer …`. **Before the first computer-use command in a turn, read `references/computer-use.md`.** It contains the low-latency discovery/attach path, snapshot and batching rules, foreground/desktop escalation, browser and native-menu tools, concurrency guarantees, protected surfaces, audit behavior, and cleanup contract.
+
+Never invoke `cua-driver` directly, edit computer-use state files, start its daemon yourself, or substitute GUI shell automation. atrium owns daemon lifecycle, exact-process authorization, leases, approvals, cursor/PiP transparency, audit logging, and multi-agent coordination.
 
 ## Teaching mode
 

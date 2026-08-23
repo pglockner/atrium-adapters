@@ -214,7 +214,10 @@ The `args` field is reserved; set it to `null`.
 
 ### list_recent_sessions
 
-Lists recent sessions for a working directory, sorted by `lastActive` descending.
+Lists directly resumable, top-level sessions for a working directory, sorted by
+actual `lastActive` descending. Subagent and other parented child-session
+artifacts must not be returned; those belong under their parent session's task
+or transcript UI, not in an interactive resume picker.
 
 **Args:** `$1` = working directory (absolute path) | **Exit:** Always 0 (empty array if none)
 
@@ -274,7 +277,7 @@ Exit 2 for unknown subcommands. See [Hook Integration](#hook-integration) for im
 
 ### launcher_options
 
-A static JSON file (not a script) defining toggle options in the launcher bar.
+A static JSON file (not a script) defining toggle options in the launcher bar. atrium reads and caches it at adapter load — a `script` method is accepted by the manifest schema but is not executed, so the launcher would show no options.
 
 ```json
 {
@@ -289,6 +292,8 @@ A static JSON file (not a script) defining toggle options in the launcher bar.
 ```
 
 Option `key` values map directly to the flags JSON passed to `build_launch_command` and `build_resume_command`.
+
+`select` choices may be a bare string or `{value, label, efforts?}`. `efforts` is the per-model subset of the adapter's effort enum (Claude/Codex/Grok/Kimi); omit it to use the full effort list.
 
 ---
 
@@ -380,6 +385,17 @@ Clone this repo and run `./validate-adapter.sh adapters/claude-code/` for a refe
 5. Open a pull request -- CI validates automatically
 
 > **Keep versions in sync.** The `version` in `registry.json` must match `adapters/<name>/adapter.json`. atrium's update notice compares a user's installed `adapter.json` version against the `registry.json` version, and the bundled auto-update only re-copies an adapter when its version increases. Any change to an adapter's scripts or manifest must bump **both** files, or the change won't reach users.
+
+### Maintainer publication
+
+`main/registry.json` is the live production registry. Prepare content and its
+generated release metadata on a branch, push that branch, and wait for its
+`Validate Adapters` check to pass before advancing `main` to the same commit.
+Branch protection requires that pre-publication check on the exact commit.
+
+After rebasing, regenerate release metadata against the rebased content commit.
+The generator rejects a source commit that is no longer an ancestor of `HEAD`,
+preventing a local reflog from masking a commit GitHub cannot serve.
 
 **Guidelines:** Self-contained, no deps beyond `jq` + POSIX. Bash, tested on macOS and Ubuntu. 3s timeout (50ms for `list_recent_sessions`). Atomic writes for config files. Never store credentials.
 

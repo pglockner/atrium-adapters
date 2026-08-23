@@ -6,13 +6,13 @@
       "remotePath": "adapters/shared/atrium-context.md",
       "target": "atrium-home",
       "destName": "atrium-context.md",
-      "sha256": "502e838acdec94ba326abf9abd8ad7f64939bd17dfab7212e5e97b783209400c"
+      "sha256": "3a408d5e2ce0ba48b878a9af699a170c5be38861913f2fd31da2b4843562284c"
     },
     {
       "id": "atrium-skill",
       "remotePath": "skills/atrium/SKILL.md",
       "target": "adapter-skill",
-      "sha256": "3e7fa04806c3876b14d3a37b4b4c7d27be2e19759fb6ac428790883467b584b2"
+      "sha256": "40da16f8e2c08634456e044d4f38276e8816f29709c5c2104d7061d0aa9f25f0"
     },
     {
       "id": "atrium-skill-notes-ui",
@@ -22,11 +22,25 @@
       "sha256": "2976d4cf2be2dd6c8206a74d96b41d98a2ec9cb9f21f188acb179697c3b47f93"
     },
     {
+      "id": "atrium-skill-chat-canvas-fence",
+      "remotePath": "skills/atrium/references/chat-canvas-fence.md",
+      "target": "adapter-skill-reference",
+      "destName": "chat-canvas-fence.md",
+      "sha256": "11abaf3bfd9326b1373814b35d1a7c9db12928128fdbde57ef4e518ff9a81a9f"
+    },
+    {
       "id": "atrium-skill-capture",
       "remotePath": "skills/atrium/references/capture.md",
       "target": "adapter-skill-reference",
       "destName": "capture.md",
       "sha256": "04ab085fd85c0c40af9c9b747b904fb84d7eda2d9d10748c254af1164234d4ed"
+    },
+    {
+      "id": "atrium-skill-computer-use",
+      "remotePath": "skills/atrium/references/computer-use.md",
+      "target": "adapter-skill-reference",
+      "destName": "computer-use.md",
+      "sha256": "0adeb0003a60aa1ce932d3978eaccb4b2cb4bd398bc123055d1f613625593dfc"
     },
     {
       "id": "atrium-skill-teaching",
@@ -73,7 +87,7 @@
   ],
   "source": {
     "repository": "jonnyasmar/atrium-adapters",
-    "commit": "54a6bebb609ed66b513fe4e47bca204a8f6bcf20",
-    "generation": 14
+    "commit": "29056ef64aa34025b92bd19a19ce2a99098942d6",
+    "generation": 29
   }
 }

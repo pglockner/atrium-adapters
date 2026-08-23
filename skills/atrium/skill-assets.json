@@ -2,7 +2,9 @@
   "version": 1,
   "references": [
     "notes-interactive-ui.md",
+    "chat-canvas-fence.md",
     "capture.md",
+    "computer-use.md",
     "teaching-mode.md",
     "authoring-skills.md"
   ]
