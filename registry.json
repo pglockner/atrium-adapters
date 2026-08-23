@@ -36,7 +36,7 @@
           "postInstallAuth": true
         }
       },
-      "contentSha256": "8bd450560866afb5ee91696b197b0ef2fdc0149a28de4092439070f5531c4e70",
+      "contentSha256": "8e0949e1a9720b9cfd4066d95fafa08efec706c8017fa8186594cd12e22f869c",
       "maxAppVersion": null
     },
     {
@@ -78,7 +78,7 @@
           "postInstallAuth": true
         }
       },
-      "contentSha256": "f5578676b136d06c045b7bb9a43fe08571ebcab65feec91f6a5dc10e47327f85",
+      "contentSha256": "b5c4722911b19356fd888942a7ebd1fad35776b9e4af150fb3750983ea38c52b",
       "maxAppVersion": null
     },
     {
@@ -203,7 +203,7 @@
           "postInstallAuth": true
         }
       },
-      "contentSha256": "a9d7cffa03fc9e161d949b2f0933e795b751ad3375ef25e657ca386cfdd71dae",
+      "contentSha256": "19d6986e9538b7aabd15891d7cfc63d3e97af41a64de9470f2dcdd76b262b7f0",
       "maxAppVersion": null
     },
     {
@@ -235,7 +235,7 @@
           "postInstallAuth": true
         }
       },
-      "contentSha256": "906214fcc2a87cf3209a0aa59d89b4aef32258066a4431a4118ecd06bdeaa9c8",
+      "contentSha256": "9061de0b72a3c9ec2a1835c201bafd22f960dc4b871313ba0b407edd17c7ef4c",
       "maxAppVersion": null
     },
     {
@@ -327,14 +327,14 @@
           "postInstallAuth": true
         }
       },
-      "contentSha256": "89dfa1591db941f308c6536eaea9eb4f6f20e1f94ecd798aca6282aa81795626",
+      "contentSha256": "13071d4c21ac9ccbf6c49cd6eb7749ccdebfac530bd1fe165094fb81933a0516",
       "maxAppVersion": null
     }
   ],
   "source": {
     "repository": "jonnyasmar/atrium-adapters",
-    "commit": "29056ef64aa34025b92bd19a19ce2a99098942d6",
-    "sharedSha256": "5be650b0e31071e9f5c4215ec79f3a9fcb0206156917f8930cf31eb81a7f1a40",
+    "commit": "11e0fe2cd797b7af8babde3f02bb8a565a1da68c",
+    "sharedSha256": "71b4cc5d0077cde8a923e91cd60967923e43e9a408ede0e184cf3f5b1ad94492",
     "schemaSha256": "c4d7774442208a390fc9c2ebff0dceb3c0ee883bee6b7d6b45b9cbb84833dbe0",
     "methodsSchemaSha256": "7162e372fd25b584a9fae035bdc8e05c32e517aa3342de4b71acc84a27751b87"
   },
