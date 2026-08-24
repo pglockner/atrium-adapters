@@ -59,6 +59,9 @@ jobs:
       - name: Validate package-manager-aware update checks
         run: bash tests/homebrew-managed-updates.assert.sh
 
+      - name: Validate kimi workspace-trust pre-accept
+        run: bash tests/kimi-workspace-trust.assert.sh
+
       - name: Validate immutable release metadata
         run: |
           node scripts/test-runtime-tree-digest.mjs

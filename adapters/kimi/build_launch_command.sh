@@ -2,15 +2,20 @@
 set -euo pipefail
 
 FLAGS="${1:-"{}"}"
+ADAPTER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-jq -cn --argjson flags "$FLAGS" '
+jq -cn --argjson flags "$FLAGS" --arg trustSh "${ADAPTER_DIR}/trust-workspace.sh" '
   def extra_args:
     ($flags.extraArgs // "")
     | if type != "string" then "" else . end
     | gsub("^\\s+|\\s+$"; "")
     | if length == 0 then [] else split(" ") | map(select(length > 0)) end;
   (
-    (if (($flags.effort // "") | type == "string" and length > 0)
+    # kimi has no --trust flag and its prompt defaults to "Don'"'"'t trust — Exit
+    # Kimi Code", so an unattended launch quits. The wrapper writes the trust
+    # record for $PWD, then execs the rest.
+    (if $flags.trust == true then [$trustSh] else [] end)
+    + (if (($flags.effort // "") | type == "string" and length > 0)
      then ["env", ("KIMI_MODEL_THINKING_EFFORT=" + $flags.effort)]
      else [] end)
     + ["kimi"]
