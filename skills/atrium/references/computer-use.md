@@ -63,6 +63,8 @@ Run `computer tools --json` for the runtime capability registry, then `computer 
 
 Useful direct groups include native `invoke_menu`; browser prepare/state/navigation/click/type/pointer/dialog/download/file-input operations; cursor position, motion and theme; screen/session/desktop/recording state; health/config/update inspection; and approved app foreground/termination operations. Pass exact `pid` and `window_id` to target/browser calls so atrium can enforce ownership and per-window serialization. Use browser primitives only after `browser_prepare` establishes the driver route.
 
+Treat `computer navigate --pid <pid> --url <url>` as a plain OS URL handoff, not current-tab navigation. The browser decides where the URL opens; Arc commonly opens a separate Little Arc window, so repeated handoffs can create multiple windows. Accessibility can read page content but does not reliably activate in-page controls—an action can report success while the page does nothing. For current-tab navigation, clicking, or typing, run `browser_prepare` and then use the browser-specific navigation/click/type tools.
+
 Recording start/stop and replay are not agent-callable: the current recorder is daemon-global rather than session-scoped, and replay can execute historical input. Configuration, cursor visibility, OS permission prompts, and driver installation also remain host-owned. This is capability fidelity, not a raw bypass: when a safe concurrency or authorization boundary does not exist, the registry says so explicitly.
 
 ## Approvals and protected surfaces

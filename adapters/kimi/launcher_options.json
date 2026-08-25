@@ -8,6 +8,13 @@
       "default": false
     },
     {
+      "key": "trust",
+      "label": "trust",
+      "description": "Pre-trust the folder (enables its project MCP servers)",
+      "type": "toggle",
+      "default": false
+    },
+    {
       "key": "model",
       "label": "model",
       "description": "Override the configured Kimi model",

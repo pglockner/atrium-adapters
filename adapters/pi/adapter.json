@@ -5,7 +5,7 @@
   "description": "Minimal terminal coding agent by Mario Zechner (pi.dev)",
   "accent": "#06b6d4",
   "binary": "pi",
-  "version": "0.6.6",
+  "version": "0.6.7",
   "updateCommand": [
     "pi",
     "update"
@@ -31,7 +31,7 @@
       "postInstallAuth": true
     },
     "linux": {
-      "cmd": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+      "cmd": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent || { echo \"atrium: npm global prefix not writable; retrying under ~/.local\"; npm install -g --prefix \"$HOME/.local\" --ignore-scripts @earendil-works/pi-coding-agent; }",
       "postInstallAuth": true
     },
     "windows": {

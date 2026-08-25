@@ -5,7 +5,7 @@
   "description": "Open-source AI coding agent built for the terminal (opencode.ai)",
   "accent": "#a855f7",
   "binary": "opencode",
-  "version": "0.5.9",
+  "version": "0.5.10",
   "updateCommand": [
     "opencode",
     "upgrade"
@@ -32,7 +32,7 @@
       "postInstallAuth": true
     },
     "linux": {
-      "cmd": "npm install -g opencode-ai",
+      "cmd": "npm install -g opencode-ai || { echo \"atrium: npm global prefix not writable; retrying under ~/.local\"; npm install -g --prefix \"$HOME/.local\" opencode-ai; }",
       "postInstallAuth": true
     },
     "windows": {

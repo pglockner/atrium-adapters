@@ -64,6 +64,33 @@ atrium exports these to every pane:
 
 If a prefix matches more than one ID, the CLI lists candidates and fails loudly — type more characters.
 
+## Remote locations (agents and projects on another machine)
+
+A project can be bound to a **remote location**, in which case its terminals,
+agents and files all live on that machine — not this one. Two consequences you
+have to know about, because the default answers are scoped to this machine:
+
+- **Listing.** A bare `agent list` / `pane list` only sees THIS machine's.
+  `agent list --all-locations` adds every paired location's agents, each tagged
+  with the location it runs on. `agent list --location <name>` targets one.
+  **If you are looking for a peer agent and find none, run `--all-locations`
+  before telling anyone there isn't one** — remote agents are invisible to the
+  bare form, and "no other agents" is the wrong answer, not an empty result.
+- **Addressing.** A remote agent is `<id>@<location>` — e.g.
+  `agent message 43db992e@srv1844920 "…"`. That form also reports which route
+  it took. A bare `<id>` works too when it is unambiguous, and messaging is the
+  same verb either way: **`agent message` reaches an agent on another machine
+  exactly like a local one.** You do not need ssh, and you must not shell into
+  the box to talk to an agent atrium already owns.
+
+```bash
+# Who else is running, anywhere?
+"$ATRIUM_CLI_PATH" agent list --all-locations
+
+# Talk to one of them, on whichever machine it lives on.
+"$ATRIUM_CLI_PATH" agent message 43db992e@srv1844920 "Taking the API half — you take the UI."
+```
+
 ## Key conventions
 
 **`--source` on task ops.** Every task create/update/comment/label takes `--source`. Use `"adapter:<your adapter>"` (e.g. `"adapter:claude-code"`) for your own actions; `"user:<name>"` only when acting for a human.

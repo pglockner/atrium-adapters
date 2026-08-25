@@ -6,13 +6,13 @@
       "remotePath": "adapters/shared/atrium-context.md",
       "target": "atrium-home",
       "destName": "atrium-context.md",
-      "sha256": "3a408d5e2ce0ba48b878a9af699a170c5be38861913f2fd31da2b4843562284c"
+      "sha256": "2cd107714e25a7859e352b2f233a1cb6d4718377204e16c82c790e3d8037da09"
     },
     {
       "id": "atrium-skill",
       "remotePath": "skills/atrium/SKILL.md",
       "target": "adapter-skill",
-      "sha256": "40da16f8e2c08634456e044d4f38276e8816f29709c5c2104d7061d0aa9f25f0"
+      "sha256": "2b51a8bc468d2720c96e11ecc2df565fb6209b267c1a958806e15a77020f57a2"
     },
     {
       "id": "atrium-skill-notes-ui",
@@ -40,7 +40,7 @@
       "remotePath": "skills/atrium/references/computer-use.md",
       "target": "adapter-skill-reference",
       "destName": "computer-use.md",
-      "sha256": "0adeb0003a60aa1ce932d3978eaccb4b2cb4bd398bc123055d1f613625593dfc"
+      "sha256": "a4fff4b17c6399054474498443a56bf4e40d5eb3eca289f8ce79ccc968410b05"
     },
     {
       "id": "atrium-skill-teaching",
@@ -87,7 +87,7 @@
   ],
   "source": {
     "repository": "jonnyasmar/atrium-adapters",
-    "commit": "29056ef64aa34025b92bd19a19ce2a99098942d6",
-    "generation": 29
+    "commit": "ed0106060aff5b93faeaf6a7bd0448080d315c05",
+    "generation": 31
   }
 }
