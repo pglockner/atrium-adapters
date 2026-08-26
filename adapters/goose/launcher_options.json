@@ -22,7 +22,9 @@
         { "value": "moonshotai/kimi-k3", "label": "Kimi K3" },
         { "value": "x-ai/grok-4.6", "label": "Grok 4.6" },
         { "value": "z-ai/glm-5.2", "label": "GLM 5.2" },
-        { "value": "meta-llama/llama-4-maverick", "label": "Llama 4 Maverick" }
+        { "value": "z-ai/glm-5.2:free", "label": "GLM 5.2 (Free)" },
+        { "value": "meta-llama/llama-4-maverick", "label": "Llama 4 Maverick" },
+        { "value": "mistralai/devstral-2512", "label": "Devstral" }
       ]
     },
     {
