@@ -358,6 +358,21 @@
       },
       "contentSha256": "535d71bcb2877daaae09de9b2f4c4be7a22495bc5bf9bdd1c20eaaddc291f29f",
       "maxAppVersion": null
+    },
+    {
+      "name": "goose",
+      "displayName": "Goose",
+      "description": "Block's open-source AI agent CLI (BYOK, OpenRouter and 20+ providers)",
+      "accent": "#f59e0b",
+      "binary": "goose",
+      "sdkVersion": 2,
+      "platforms": [
+        "macos",
+        "linux"
+      ],
+      "official": false,
+      "version": "1.0.0",
+      "minAppVersion": "0.298.0"
     }
   ],
   "source": {

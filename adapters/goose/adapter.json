@@ -1,0 +1,41 @@
+{
+  "sdkVersion": 2,
+  "name": "goose",
+  "displayName": "Goose",
+  "description": "Block's open-source AI agent CLI (BYOK, OpenRouter and 20+ providers)",
+  "accent": "#f59e0b",
+  "binary": "goose",
+  "version": "1.0.0",
+  "binaryDiscovery": {
+    "commands": ["goose"],
+    "wellKnownPaths": [
+      "/opt/homebrew/bin/goose",
+      "/usr/local/bin/goose",
+      "~/.local/bin/goose"
+    ]
+  },
+  "install": {
+    "macos": {
+      "cmd": "brew install block-goose-cli",
+      "postInstallAuth": true
+    },
+    "linux": {
+      "cmd": "curl -fsSL https://github.com/aaif-goose/goose/releases/download/stable/download_cli.sh | CONFIGURE=false bash",
+      "postInstallAuth": true
+    }
+  },
+  "hooks": {
+    "session-start": "atrium://hooks/goose/session-start",
+    "session-end": "atrium://hooks/goose/session-end"
+  },
+  "skillInstallPath": "~/.agents/skills/atrium/SKILL.md",
+  "skillsDir": "~/.agents/skills",
+  "icon": "icon.svg",
+  "methods": {
+    "build_launch_command": { "script": "build_launch_command.sh" },
+    "build_resume_command": { "script": "build_resume_command.sh" },
+    "list_recent_sessions": { "script": "list_recent_sessions.sh" },
+    "launcher_options": { "static": "launcher_options.json" },
+    "hooks": { "script": "hooks.sh" }
+  }
+}
