@@ -28,9 +28,9 @@
     {
       "key": "provider",
       "label": "provider",
-      "description": "Provider override (e.g. openrouter, anthropic, ollama)",
+      "description": "Provider override (e.g. openrouter, anthropic, ollama). Leave blank to use Goose's own configured default provider.",
       "type": "text",
-      "default": "openrouter"
+      "default": ""
     },
     {
       "key": "extraArgs",
