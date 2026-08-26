@@ -31,6 +31,24 @@
   "skillInstallPath": "~/.agents/skills/atrium/SKILL.md",
   "skillsDir": "~/.agents/skills",
   "icon": "icon.svg",
+  "chatTransport": {
+    "kind": "acp",
+    "args": ["acp", "--with-builtin", "developer,skills,todo,analyze,summon"],
+    "capabilities": {
+      "resume": true,
+      "setModel": true,
+      "thinking": true,
+      "permissionCallback": true,
+      "commandDiscovery": true,
+      "planMode": false,
+      "contextUsage": true,
+      "imageInput": true,
+      "checkpointing": false,
+      "subagentEvents": false,
+      "steering": false,
+      "backgroundTasks": false
+    }
+  },
   "methods": {
     "build_launch_command": { "script": "build_launch_command.sh" },
     "build_resume_command": { "script": "build_resume_command.sh" },
