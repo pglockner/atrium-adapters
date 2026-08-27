@@ -7,6 +7,7 @@ flags="${2:-}"
 
 provider=$(echo "$flags" | jq -r '.extra.provider // empty')
 model=$(echo "$flags" | jq -r '.extra.model // empty')
+effort=$(echo "$flags" | jq -r '.extra.effort // empty')
 extra_args=$(echo "$flags" | jq -r '.extra.extraArgs // empty')
 
 cmd=(goose session --resume --session-id "$session_id")
@@ -16,6 +17,12 @@ cmd=(goose session --resume --session-id "$session_id")
 # switching models out from under a resumed session.
 [ -n "$provider" ] && cmd+=(--provider "$provider")
 [ -n "$model" ] && cmd+=(--model "$model")
+
+# Carry the effort so the resumed session keeps the same thinking_effort.
+# Goose has no --effort flag; set GOOSE_THINKING_EFFORT instead.
+if [ -n "$effort" ]; then
+  cmd=(env GOOSE_THINKING_EFFORT="$effort" "${cmd[@]}")
+fi
 
 if [ -n "$extra_args" ]; then
   # shellcheck disable=SC2206

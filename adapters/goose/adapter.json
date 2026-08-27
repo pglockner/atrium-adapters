@@ -7,7 +7,9 @@
   "binary": "goose",
   "version": "1.0.0",
   "binaryDiscovery": {
-    "commands": ["goose"],
+    "commands": [
+      "goose"
+    ],
     "wellKnownPaths": [
       "/opt/homebrew/bin/goose",
       "/usr/local/bin/goose",
@@ -24,36 +26,82 @@
       "postInstallAuth": true
     }
   },
-  "hooks": {
-    "session-start": "atrium://hooks/goose/session-start",
-    "session-end": "atrium://hooks/goose/session-end"
-  },
-  "skillInstallPath": "~/.config/goose/skills/atrium/SKILL.md",
-  "skillsDir": "~/.config/goose/skills",
   "icon": "icon.svg",
   "chatTransport": {
     "kind": "acp",
-    "args": ["acp", "--with-builtin", "developer,skills,todo,analyze,summon"],
+    "args": [
+      "acp",
+      "--with-builtin",
+      "developer,skills,todo,analyze,summon"
+    ],
     "capabilities": {
+      "checkpointing": false,
       "resume": true,
+      "imageInput": true,
       "setModel": true,
       "thinking": true,
-      "permissionCallback": true,
-      "commandDiscovery": true,
       "planMode": false,
-      "contextUsage": true,
-      "imageInput": true,
-      "checkpointing": false,
-      "subagentEvents": false,
       "steering": false,
-      "backgroundTasks": false
+      "backgroundTasks": false,
+      "subagentEvents": false,
+      "commandDiscovery": true,
+      "permissionCallback": true,
+      "contextUsage": true
     }
   },
   "methods": {
-    "build_launch_command": { "script": "build_launch_command.sh" },
-    "build_resume_command": { "script": "build_resume_command.sh" },
-    "list_recent_sessions": { "script": "list_recent_sessions.sh" },
-    "launcher_options": { "static": "launcher_options.json" },
-    "hooks": { "script": "hooks.sh" }
-  }
+    "build_launch_command": {
+      "script": "build_launch_command.sh"
+    },
+    "build_resume_command": {
+      "script": "build_resume_command.sh"
+    },
+    "list_recent_sessions": {
+      "script": "list_recent_sessions.sh"
+    },
+    "hooks": {
+      "script": "hooks.sh"
+    },
+    "launcher_options": {
+      "static": "launcher_options.json"
+    },
+    "check_update": {
+      "script": "check_update.sh"
+    }
+  },
+  "hooks": {
+    "session-start": "atrium://hooks/goose/session-start",
+    "session-end": "atrium://hooks/goose/session-end",
+    "user-prompt-submit": "atrium://hooks/goose/user-prompt-submit",
+    "pre-tool-use": "atrium://hooks/goose/pre-tool-use",
+    "post-tool-use": "atrium://hooks/goose/post-tool-use",
+    "post-tool-use-failure": "atrium://hooks/goose/post-tool-use-failure"
+  },
+  "hookEnvelopes": {
+    "sessionStartManifest": {
+      "kind": "identity"
+    },
+    "userPromptSubmit": {
+      "kind": "hookSpecificOutput",
+      "hookEventName": "UserPromptSubmit",
+      "includeSystemMessage": false
+    },
+    "preToolUse": {
+      "kind": "none"
+    },
+    "postToolUse": {
+      "kind": "none"
+    }
+  },
+  "sessionExtractor": {
+    "script": "extract_session.sh",
+    "schemaVersion": 1,
+    "supportsDepths": [
+      "quick",
+      "standard",
+      "deep"
+    ]
+  },
+  "skillInstallPath": "~/.config/goose/skills/atrium/SKILL.md",
+  "skillsDir": "~/.config/goose/skills"
 }

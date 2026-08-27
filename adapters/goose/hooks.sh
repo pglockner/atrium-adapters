@@ -37,6 +37,18 @@ EOF
     }],
     "SessionEnd": [{
       "hooks": [{ "type": "command", "command": "${RELAY_SCRIPT} session-end" }]
+    }],
+    "UserPromptSubmit": [{
+      "hooks": [{ "type": "command", "command": "${RELAY_SCRIPT} user-prompt-submit" }]
+    }],
+    "PreToolUse": [{
+      "hooks": [{ "type": "command", "command": "${RELAY_SCRIPT} pre-tool-use" }]
+    }],
+    "PostToolUse": [{
+      "hooks": [{ "type": "command", "command": "${RELAY_SCRIPT} post-tool-use" }]
+    }],
+    "PostToolUseFailure": [{
+      "hooks": [{ "type": "command", "command": "${RELAY_SCRIPT} post-tool-use-failure" }]
     }]
   }
 }
