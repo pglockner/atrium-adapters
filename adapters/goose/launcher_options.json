@@ -7,24 +7,172 @@
       "type": "select",
       "default": "",
       "choices": [
-        { "value": "anthropic/claude-opus-5", "label": "Claude Opus 5", "efforts": ["off", "low", "medium", "high", "max"] },
-        { "value": "anthropic/claude-sonnet-5", "label": "Claude Sonnet 5", "efforts": ["off", "low", "medium", "high", "max"] },
-        { "value": "anthropic/claude-haiku-4.5", "label": "Claude Haiku 4.5", "efforts": ["off", "low", "medium", "high"] },
-        { "value": "openai/gpt-5.6-sol", "label": "GPT-5.6 Sol", "efforts": ["off", "low", "medium", "high", "max"] },
-        { "value": "openai/gpt-5.6-terra", "label": "GPT-5.6 Terra", "efforts": ["off", "low", "medium", "high", "max"] },
-        { "value": "openai/gpt-5.3-codex", "label": "Codex 5.3", "efforts": ["off", "low", "medium", "high"] },
-        { "value": "google/gemini-3.5-flash", "label": "Gemini 3.5 Flash", "efforts": ["off", "low", "medium", "high"] },
-        { "value": "google/gemini-2.5-pro", "label": "Gemini 2.5 Pro", "efforts": ["off", "low", "medium", "high", "max"] },
-        { "value": "deepseek/deepseek-v4-pro", "label": "DeepSeek V4 Pro", "efforts": ["off", "low", "medium", "high", "max"] },
-        { "value": "deepseek/deepseek-v4-flash", "label": "DeepSeek V4 Flash", "efforts": ["off", "low", "medium"] },
-        { "value": "qwen/qwen3-coder-plus", "label": "Qwen3 Coder Plus", "efforts": ["off"] },
-        { "value": "qwen/qwen3-max", "label": "Qwen3 Max", "efforts": ["off"] },
-        { "value": "moonshotai/kimi-k3", "label": "Kimi K3", "efforts": ["off", "low", "medium", "high", "max"] },
-        { "value": "x-ai/grok-4.6", "label": "Grok 4.6", "efforts": ["off", "low", "medium", "high", "max"] },
-        { "value": "z-ai/glm-5.2", "label": "GLM 5.2", "efforts": ["off", "low", "medium", "high", "max"] },
-        { "value": "z-ai/glm-5.2:free", "label": "GLM 5.2 (Free)", "efforts": ["off", "low", "medium", "high", "max"] },
-        { "value": "meta-llama/llama-4-maverick", "label": "Llama 4 Maverick", "efforts": ["off"] },
-        { "value": "mistralai/devstral-2512", "label": "Devstral", "efforts": ["off"] }
+        {
+          "value": "anthropic/claude-opus-5",
+          "label": "Claude Opus 5",
+          "efforts": [
+            "off",
+            "low",
+            "medium",
+            "high",
+            "max"
+          ]
+        },
+        {
+          "value": "anthropic/claude-sonnet-5",
+          "label": "Claude Sonnet 5",
+          "efforts": [
+            "off",
+            "low",
+            "medium",
+            "high",
+            "max"
+          ]
+        },
+        {
+          "value": "anthropic/claude-haiku-4.5",
+          "label": "Claude Haiku 4.5",
+          "efforts": [
+            "off",
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        {
+          "value": "openai/gpt-5.6-sol",
+          "label": "GPT-5.6 Sol",
+          "efforts": [
+            "off",
+            "low",
+            "medium",
+            "high",
+            "max"
+          ]
+        },
+        {
+          "value": "openai/gpt-5.6-terra",
+          "label": "GPT-5.6 Terra",
+          "efforts": [
+            "off",
+            "low",
+            "medium",
+            "high",
+            "max"
+          ]
+        },
+        {
+          "value": "openai/gpt-5.3-codex",
+          "label": "Codex 5.3",
+          "efforts": [
+            "off",
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        {
+          "value": "google/gemini-3.5-flash",
+          "label": "Gemini 3.5 Flash",
+          "efforts": [
+            "off",
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        {
+          "value": "google/gemini-2.5-pro",
+          "label": "Gemini 2.5 Pro",
+          "efforts": [
+            "off",
+            "low",
+            "medium",
+            "high",
+            "max"
+          ]
+        },
+        {
+          "value": "deepseek/deepseek-v4-pro",
+          "label": "DeepSeek V4 Pro",
+          "efforts": [
+            "off",
+            "high"
+          ]
+        },
+        {
+          "value": "deepseek/deepseek-v4-flash",
+          "label": "DeepSeek V4 Flash",
+          "efforts": [
+            "off",
+            "high"
+          ]
+        },
+        {
+          "value": "qwen/qwen3-coder-plus",
+          "label": "Qwen3 Coder Plus",
+          "efforts": [
+            "off"
+          ]
+        },
+        {
+          "value": "qwen/qwen3-max",
+          "label": "Qwen3 Max",
+          "efforts": [
+            "off"
+          ]
+        },
+        {
+          "value": "moonshotai/kimi-k3",
+          "label": "Kimi K3",
+          "efforts": [
+            "off",
+            "low",
+            "high",
+            "max"
+          ]
+        },
+        {
+          "value": "x-ai/grok-4.6",
+          "label": "Grok 4.6",
+          "efforts": [
+            "off",
+            "low",
+            "medium",
+            "high",
+            "max"
+          ]
+        },
+        {
+          "value": "z-ai/glm-5.2",
+          "label": "GLM 5.2",
+          "efforts": [
+            "off",
+            "high"
+          ]
+        },
+        {
+          "value": "z-ai/glm-5.2:free",
+          "label": "GLM 5.2 (Free)",
+          "efforts": [
+            "off",
+            "high"
+          ]
+        },
+        {
+          "value": "meta-llama/llama-4-maverick",
+          "label": "Llama 4 Maverick",
+          "efforts": [
+            "off"
+          ]
+        },
+        {
+          "value": "mistralai/devstral-2512",
+          "label": "Devstral",
+          "efforts": [
+            "off"
+          ]
+        }
       ]
     },
     {
@@ -40,7 +188,13 @@
       "description": "Reasoning effort (sets GOOSE_THINKING_EFFORT; goose surfaces this over ACP as thinking_effort)",
       "type": "select",
       "default": "",
-      "choices": ["off", "low", "medium", "high", "max"]
+      "choices": [
+        "off",
+        "low",
+        "medium",
+        "high",
+        "max"
+      ]
     },
     {
       "key": "extraArgs",
@@ -51,10 +205,25 @@
     }
   ],
   "suggestedFlags": [
-    { "flag": "--provider", "description": "Override the GOOSE_PROVIDER environment variable" },
-    { "flag": "--model", "description": "Override the GOOSE_MODEL environment variable" },
-    { "flag": "--with-builtin", "description": "Add bundled builtin extensions, comma-separated" },
-    { "flag": "--max-turns", "description": "Limit agent turns before prompting for input" },
-    { "flag": "--debug", "description": "Show complete tool responses without truncation" }
+    {
+      "flag": "--provider",
+      "description": "Override the GOOSE_PROVIDER environment variable"
+    },
+    {
+      "flag": "--model",
+      "description": "Override the GOOSE_MODEL environment variable"
+    },
+    {
+      "flag": "--with-builtin",
+      "description": "Add bundled builtin extensions, comma-separated"
+    },
+    {
+      "flag": "--max-turns",
+      "description": "Limit agent turns before prompting for input"
+    },
+    {
+      "flag": "--debug",
+      "description": "Show complete tool responses without truncation"
+    }
   ]
 }
