@@ -2,13 +2,15 @@
 set -euo pipefail
 
 session_id="${1:?session id required}"
+# See build_launch_command.sh: atrium passes these keys top-level, not under
+# `extra`. Accept both shapes so resume keeps the profile's model/provider.
 flags="${2:-}"
 [ -z "$flags" ] && flags='{}'
 
-provider=$(echo "$flags" | jq -r '.extra.provider // empty')
-model=$(echo "$flags" | jq -r '.extra.model // empty')
-effort=$(echo "$flags" | jq -r '.extra.effort // empty')
-extra_args=$(echo "$flags" | jq -r '.extra.extraArgs // empty')
+provider=$(echo "$flags" | jq -r '[.provider, .extra.provider] | map(select(. != null and . != "")) | first // empty')
+model=$(echo "$flags" | jq -r '[.model, .extra.model] | map(select(. != null and . != "")) | first // empty')
+effort=$(echo "$flags" | jq -r '[.effort, .extra.effort] | map(select(. != null and . != "")) | first // empty')
+extra_args=$(echo "$flags" | jq -r '[.extraArgs, .extra.extraArgs] | map(select(. != null and . != "")) | first // empty')
 
 cmd=(goose session --resume --session-id "$session_id")
 

@@ -17,14 +17,14 @@
         { "value": "google/gemini-2.5-pro", "label": "Gemini 2.5 Pro", "efforts": ["off", "low", "medium", "high", "max"] },
         { "value": "deepseek/deepseek-v4-pro", "label": "DeepSeek V4 Pro", "efforts": ["off", "low", "medium", "high", "max"] },
         { "value": "deepseek/deepseek-v4-flash", "label": "DeepSeek V4 Flash", "efforts": ["off", "low", "medium"] },
-        { "value": "qwen/qwen3-coder-plus", "label": "Qwen3 Coder Plus", "efforts": ["off", "low", "medium", "high"] },
-        { "value": "qwen/qwen3-max", "label": "Qwen3 Max", "efforts": ["off", "low", "medium", "high", "max"] },
+        { "value": "qwen/qwen3-coder-plus", "label": "Qwen3 Coder Plus", "efforts": ["off"] },
+        { "value": "qwen/qwen3-max", "label": "Qwen3 Max", "efforts": ["off"] },
         { "value": "moonshotai/kimi-k3", "label": "Kimi K3", "efforts": ["off", "low", "medium", "high", "max"] },
         { "value": "x-ai/grok-4.6", "label": "Grok 4.6", "efforts": ["off", "low", "medium", "high", "max"] },
         { "value": "z-ai/glm-5.2", "label": "GLM 5.2", "efforts": ["off", "low", "medium", "high", "max"] },
-        { "value": "z-ai/glm-5.2:free", "label": "GLM 5.2 (Free)", "efforts": ["off"] },
+        { "value": "z-ai/glm-5.2:free", "label": "GLM 5.2 (Free)", "efforts": ["off", "low", "medium", "high", "max"] },
         { "value": "meta-llama/llama-4-maverick", "label": "Llama 4 Maverick", "efforts": ["off"] },
-        { "value": "mistralai/devstral-2512", "label": "Devstral", "efforts": ["off", "low", "medium", "high", "max"] }
+        { "value": "mistralai/devstral-2512", "label": "Devstral", "efforts": ["off"] }
       ]
     },
     {
@@ -39,7 +39,7 @@
       "label": "effort",
       "description": "Reasoning effort (sets GOOSE_THINKING_EFFORT; goose surfaces this over ACP as thinking_effort)",
       "type": "select",
-      "default": "high",
+      "default": "",
       "choices": ["off", "low", "medium", "high", "max"]
     },
     {

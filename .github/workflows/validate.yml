@@ -80,8 +80,8 @@ jobs:
         run: |
           bash tests/grok-launcher-catalog.assert.sh
 
-      - name: Validate Hermes transcript recovery
-        run: python3 -m unittest discover -s adapters/hermes/tests -p '*_test.py'
+      - name: Validate goose launch-profile flag plumbing
+        run: bash tests/goose-launch-profile-flags.assert.sh
 
       - name: Validate package-manager-aware update checks
         run: bash tests/homebrew-managed-updates.assert.sh

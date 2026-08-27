@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# atrium passes launcher_options keys at the TOP level of the flags bag
+# ({"model":"…","provider":"…"}), which is what every shipped adapter reads.
+# The SDK README also documents a nested `extra` object, so accept both and
+# prefer whichever is actually populated. Reading only `.extra` silently
+# dropped every launch-profile model/provider/effort selection.
 flags="${1:-}"
 [ -z "$flags" ] && flags='{}'
 
-provider=$(echo "$flags" | jq -r '.extra.provider // empty')
-model=$(echo "$flags" | jq -r '.extra.model // empty')
-effort=$(echo "$flags" | jq -r '.extra.effort // empty')
-extra_args=$(echo "$flags" | jq -r '.extra.extraArgs // empty')
+provider=$(echo "$flags" | jq -r '[.provider, .extra.provider] | map(select(. != null and . != "")) | first // empty')
+model=$(echo "$flags" | jq -r '[.model, .extra.model] | map(select(. != null and . != "")) | first // empty')
+effort=$(echo "$flags" | jq -r '[.effort, .extra.effort] | map(select(. != null and . != "")) | first // empty')
+extra_args=$(echo "$flags" | jq -r '[.extraArgs, .extra.extraArgs] | map(select(. != null and . != "")) | first // empty')
 
 cmd=(goose session)
 

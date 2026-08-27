@@ -70,6 +70,21 @@ assert_command \
   fi
 }
 
+# goose reads the flags bag atrium actually sends: launcher_options keys at
+# the top level. It previously read only a nested `extra` object (which the
+# SDK README documents but atrium does not send), so every profile's
+# model/provider/effort was silently dropped on both launch and resume.
+assert_command \
+  "goose" \
+  '{"model":"qwen/qwen3-coder","provider":"openrouter","effort":"medium","extraArgs":"--max-turns 3"}' \
+  '["env","GOOSE_THINKING_EFFORT=medium","goose","session","--resume","--session-id","sess-123","--provider","openrouter","--model","qwen/qwen3-coder","--max-turns","3"]'
+
+# The documented nested shape must keep working too.
+assert_command \
+  "goose" \
+  '{"extra":{"model":"qwen/qwen3-coder","provider":"openrouter"}}' \
+  '["goose","session","--resume","--session-id","sess-123","--provider","openrouter","--model","qwen/qwen3-coder"]'
+
 assert_command \
   "hermes" \
   '{"dangerouslySkipPermissions":true,"model":"anthropic/claude","provider":"openrouter","extraArgs":"--max-turns 3"}' \
