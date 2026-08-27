@@ -48,6 +48,18 @@ assert_launch "blank values are omitted, not passed as empty flags" \
   '{"model":"","provider":"","effort":"","extraArgs":""}' \
   '["goose","session"]'
 
+# The model select ships a single "default" sentinel because atrium's static
+# launcher_options cannot enumerate goose's per-provider model list. It must be
+# swallowed, never forwarded: `goose --model default` is a hard 400 from the
+# provider ("default is not a valid model ID").
+assert_launch "model=default is swallowed, not passed to the CLI" \
+  '{"model":"default","provider":"openrouter"}' \
+  '["goose","session","--provider","openrouter"]'
+
+assert_launch "model=default with no provider yields a bare session" \
+  '{"model":"default"}' \
+  '["goose","session"]'
+
 assert_launch "no flags at all" '{}' '["goose","session"]'
 assert_launch "empty flags string" '' '["goose","session"]'
 
