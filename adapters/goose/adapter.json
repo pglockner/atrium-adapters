@@ -28,8 +28,8 @@
     "session-start": "atrium://hooks/goose/session-start",
     "session-end": "atrium://hooks/goose/session-end"
   },
-  "skillInstallPath": "~/.agents/skills/atrium/SKILL.md",
-  "skillsDir": "~/.agents/skills",
+  "skillInstallPath": "~/.config/goose/skills/atrium/SKILL.md",
+  "skillsDir": "~/.config/goose/skills",
   "icon": "icon.svg",
   "chatTransport": {
     "kind": "acp",

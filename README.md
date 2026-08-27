@@ -445,6 +445,7 @@ without a relaunch, and **without any version bump**:
 | [opencode](adapters/opencode/) | Open-source AI coding agent built for the terminal | `opencode` | Official |
 | [pi](adapters/pi/) | Minimal terminal coding agent by Mario Zechner | `pi` | Official |
 | [cursor-agent](adapters/cursor-agent/) | Cursor's agent CLI | `cursor-agent` | Official |
+| [goose](adapters/goose/) | Block's open-source AI agent CLI (BYOK, OpenRouter and 20+ providers) | `goose` | Community |
 
 ---
 
