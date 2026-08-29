@@ -1,10 +1,13 @@
 ---
 name: atrium-bug-report
-description: "Investigate an atrium problem from the local artifacts on this machine, determine a root cause where the evidence supports one, and file a curated issue on the public tracker jonnyasmar/atrium-issues. Use when the user reports that atrium misbehaved, when a seeded prompt contains an <atrium-bug-report> block, or when the user asks to file/report an atrium bug. Covers instance resolution, log correlation, benign-noise filtering, redaction, and the approval gate before posting."
-version: "0.1.0"
+description: "Investigate an atrium problem from the local artifacts on this machine, determine a root cause where the evidence supports one, and file a curated issue on the public tracker jonnyasmar/atrium-issues. Use when the user reports that atrium misbehaved, when a seeded atrium bug-report block is present, or when the user asks to file/report an atrium bug. Covers instance resolution, log correlation, benign-noise filtering, redaction, and the approval gate before posting."
+metadata:
+  version: "0.2.0"
 ---
 
 # atrium — bug report
+
+<!-- atrium-contract-reviewed-through: 7276fc44fb74e20bae77b4aecf503111f08bbbd6 -->
 
 You are filing a bug on **atrium** to the public tracker `jonnyasmar/atrium-issues`.
 
@@ -89,12 +92,13 @@ Establish `T` — the moment of the failure:
 - Otherwise ask, as one of your three questions: *"Roughly when did this happen — and had you just updated, restarted, or opened something new?"*
 - No answer available → anchor on `reportedAt` and widen the window to ±10 minutes, and say in the issue that the window is approximate.
 
-Then convert `T` into each file's time base, because **these artifacts run on three different clocks**:
+Then convert `T` into each file's time base. Most atrium-owned logs use UTC, while CEF and macOS crash reports do not:
 
 | File | Clock | Format, with a **synthetic** example |
 |---|---|---|
 | `logs/runtime.<date>.log` | **UTC**, ISO8601 with `Z` | `YYYY-MM-DDTHH:MM:SS.ffffffZ` — e.g. `2000-01-01T12:00:00.000000Z` |
 | `logs/app.<date>.log` | **UTC**, ISO8601 with `Z` | `YYYY-MM-DDTHH:MM:SS.ffffffZ` — e.g. `2000-01-01T12:00:00.000000Z` |
+| `logs/chat-runtime.<date>.log` | **UTC**, ISO8601 with `Z` | `YYYY-MM-DDTHH:MM:SS.fffZ` — e.g. `2000-01-01T12:00:00.000Z` |
 | `logs/daemon-signals.log` | **UTC**, ISO8601 with `+00:00` | `YYYY-MM-DDTHH:MM:SS.ffffff+00:00` — e.g. `2000-01-01T12:00:00.000000+00:00` |
 | `logs/cef.log` | **local time**, `MMDD/HHMMSS.uuuuuu` | `MMDD/HHMMSS.ffffff` — e.g. `0101/080000.000000` (= the `12:00:00` UTC above, at UTC-4) |
 | `logs/webview-errors.ndjson` | ISO8601 `ts` field | per record |
@@ -121,6 +125,7 @@ LOC=<MMDD/HH+tens>                   # local time base, for cef.log
 
 grep -aE "^${DAY}T${UTC}" "$L/runtime.$DAY.log"
 grep -aE "^${DAY}T${UTC}" "$L/app.$DAY.log" 2>/dev/null   # newer builds only
+grep -aE "^${DAY}T${UTC}" "$L/chat-runtime.$DAY.log" 2>/dev/null
 grep -aE "^${DAY}T${UTC}" "$L/daemon-signals.log"
 grep -aE "\]${LOC}"        "$L/cef.log"
 grep -a  "\"ts\":\"${DAY}T${UTC}" "$L/webview-errors.ndjson" 2>/dev/null
@@ -129,9 +134,9 @@ ls -t ~/Library/Logs/DiagnosticReports/ | grep -iE 'atrium'   # crash reports, n
 
 Widen to the full hour if the minute window is empty. Then narrow the timeline down to the lines that changed your mind about something — a merged timeline of 200 lines is not a timeline.
 
-### Reading `atriumd.stderr.log` (the daemon), which has no timestamps
+### Reading `atriumd.stderr.log` (the daemon's second stream), which has no timestamps
 
-This is the single most useful and most awkward artifact. It is the **background daemon** — the prime suspect for anything about restore, session lifecycle, activity/fleet state, scheduling, chat sidecars, and indexing. It is also large (tens of MB), never rotated within a run, and its `[HOOK]` lines are truncated mid-JSON by the logger. It carries no timestamps, so:
+This is the single most useful and most awkward artifact. It is the same **background daemon** that writes timestamped `tracing` events to `runtime.<date>.log`, but this file captures its untimestamped `eprintln!` output. It is the prime suspect for restore, session lifecycle, activity/fleet state, scheduling, chat sidecars, and indexing. It is also large (tens of MB), never rotated within a run, and its `[HOOK]` lines are truncated mid-JSON by the logger. It carries no timestamps, so:
 
 - **Never read it whole.** `tail -n 5000` for "what just happened", `grep -a` for a specific id.
 - **Correlate by identity, not by time.** Pane ids, session keys and run ids appear in both this file and `runtime.<date>.log`. Grep the daemon log for the id, then find the same id in the timestamped runtime log to place it.
@@ -152,7 +157,7 @@ Pick the matching class from **Symptom → hypothesis** below. For each candidat
 
 Filter every alarming line through the **Benign noise** table first. The loudest `ERROR` in an atrium log is very often routine — reporting it as the root cause is the default failure mode of this whole exercise.
 
-Useful calibration, measured on a live install: `runtime.<date>.log` in normal operation is **INFO and WARN only** — a typical busy day logs ~15,000 INFO lines, ~70 WARN, and **zero ERROR**. So an `ERROR` there is a real signal *if* it is not one of the two known-benign ones. `atriumd.stderr.log`, by contrast, is unleveled — the presence of the word "failed" means nothing on its own.
+Do not use fixed daily line counts as a health threshold. Volume changes substantially with workspace size and release instrumentation. Compare the incident window with neighbouring quiet windows on the same install, and interpret levels in context. `atriumd.stderr.log` is unleveled, so the presence of the word "failed" means nothing on its own.
 
 ---
 
@@ -210,7 +215,7 @@ Two sections do disproportionate work, and both are easy to skip:
 - **`## Impact`** — a maintainer triages on consequence, not symptom. "Rooms come back empty" is a description; "every restart loses the session an agent was mid-way through, and it has happened on each of the last three updates" is a priority. Say who it hurts, how often, and what it blocks. If it bit the user once and cost them nothing, say that too — honest low impact is useful and keeps the tracker calibrated.
 - **`## What still works`** — the neighbouring behaviour you checked and found healthy. This narrows harder than the ruled-out list, because it draws the boundary of the break: if pane creation and splitting apply fine but room rename silently no-ops, the daemon↔UI path is sound and only room-level mutations are suspect. That one line can save a maintainer an afternoon. Check two or three adjacent operations deliberately — do not guess at them, and only list what you actually exercised. Nothing checked → drop the section.
 
-Build these sections **once** and use them for either posting path — they map one-to-one onto the field ids of the repo's `bug.yml` issue form:
+Build these sections **once** for the approved issue body. The public tracker's `bug.yml` form asks for the same information when a person files by hand:
 
 | Section | `bug.yml` field id |
 |---|---|
@@ -255,7 +260,7 @@ Build these sections **once** and use them for either posting path — they map 
 
 ## Evidence
 
-<details><summary>runtime.log around <time></summary>
+<details><summary>runtime.log (atriumd tracing) around <time></summary>
 
 ```
 <the lines that are load-bearing — not the surrounding context>
@@ -317,7 +322,7 @@ This is **best effort, and the user's approval of the literal body is the real b
 
 ## Step 8 — Approval, then post
 
-Show the user the **complete final body, verbatim**, plus the title and the labels you intend to apply. Then ask. Not "shall I file this?" after a summary — the actual text.
+Show the user the **complete final body, verbatim**, plus the title. Then ask. Not "shall I file this?" after a summary — the actual text.
 
 - If they say no: **stop.** Ask what to change, or drop it. Never post a revised version without a fresh approval.
 - If they want edits: revise, show the full body again, ask again.
@@ -329,26 +334,17 @@ gh auth status                       # must be authenticated to jonnyasmar/atriu
 
 gh issue create --repo jonnyasmar/atrium-issues \
   --title "<title>" --body-file /tmp/atrium-issue.md
-
-# Labels separately and best-effort — a label that doesn't exist yet fails `create` outright.
-N=<issue number from the URL gh printed>
-for L in bug source:in-app "area:<subsystem>" "version:<x.y.z>"; do
-  gh issue edit "$N" --repo jonnyasmar/atrium-issues --add-label "$L" 2>/dev/null || true
-done
 ```
 
-`gh issue create` bypasses the issue form — that is fine and expected, because your body already carries the same sections.
+`gh issue create` bypasses the issue form — that is fine and expected, because your body already carries the same sections. Do not invent or silently attempt `source:`, `area:`, or `version:` labels: the public tracker does not provision that taxonomy, and reporters commonly lack label permissions. Classification belongs in the body. A maintainer can add the existing `bug` label during triage.
 
-**Fallback — no `gh`, or not authenticated.** Prefill the web form and let the user submit it themselves. Open it in an atrium browser pane (the `atrium` skill covers browser panes; `pane create --type browser --url "<url>"`), or just hand them the URL if atrium is the thing that is broken.
+**Fallback — no `gh`, or not authenticated.** Prefill GitHub's blank issue composer with the already-approved body and let the user submit it themselves. Open it in an atrium browser pane (the `atrium` skill covers browser panes; `pane create --type browser --url "<url>"`), or just hand them the URL if atrium is the thing that is broken.
 
 ```
-https://github.com/jonnyasmar/atrium-issues/issues/new?template=bug.yml&labels=bug,source:in-app
-  &title=<urlencoded>&version=<…>&channel=<…>&os=<…>&area=<…>
-  &summary=<…>&steps=<…>&expected=<…>&observed=<…>&root-cause=<…>
-  &evidence=<…>&ruled-out=<…>&evidence-file=<…>
+https://github.com/jonnyasmar/atrium-issues/issues/new?title=<urlencoded-title>&body=<urlencoded-approved-body>
 ```
 
-The query parameter names are the `bug.yml` field ids. URL-encode each value. GitHub truncates very long URLs — this is why the body is budgeted at ~8 KB. If it still will not fit, trim the `evidence` block first (it is the only section with a local copy in the evidence file) and note in the body that evidence was trimmed for length.
+GitHub's issue-form controls are not custom URL-prefill fields: parameters such as `version`, `area`, and `summary` are ignored even when their names match form ids. The blank composer does support `title` and `body`. URL-encode both. Browsers and intermediaries can truncate very long URLs — this is why the body is budgeted at ~8 KB. If it still will not fit, trim the `evidence` block first (it is the only section with a local copy in the evidence file) and note in the body that evidence was trimmed for length.
 
 Either way: **the user presses submit or you press it with their explicit yes. There is no third option.**
 
@@ -362,9 +358,10 @@ Everything is under the resolved data dir unless noted. Presence varies — a fr
 
 | Artifact | What it is | Answers | Does *not* answer |
 |---|---|---|---|
-| `logs/runtime.<YYYY-MM-DD>.log` | Main process, daily rotation, `tracing` format, UTC | App lifecycle, boot hydration, persistence, PTY/websocket, adapter script calls, pane/room ops | Anything the daemon does alone; anything in the frontend |
-| `logs/app.<YYYY-MM-DD>.log` | The desktop shell process (`atrium-desktop`), daily rotation, same `tracing` format. **Newer builds only** — absent on older installs, which is not itself a bug | Shell-side startup, window/CEF hosting, updater and native chrome — the half that never reached `runtime.log` | The daemon; the frontend |
-| `logs/atriumd.stderr.log` | The background daemon, unleveled `eprintln!`, **no timestamps**, huge, `[HOOK]`-dominated | Restore/session lifecycle, fleet & activity state, scheduler, chat sidecars, FTS/vault indexing, reapers | *When* anything happened |
+| `logs/runtime.<YYYY-MM-DD>.log` | The background daemon (`atriumd`), daily rotation, `tracing` format, UTC | Boot hydration, persistence, PTY/websocket, adapter script calls, pane/room ops, daemon-side capture and task work | The desktop shell or frontend |
+| `logs/app.<YYYY-MM-DD>.log` | The desktop shell process (`atrium-desktop`), daily rotation, same `tracing` format, UTC, retained for 7 days. **Newer builds only** — absent on older installs, which is not itself a bug | Shell-side startup, window/CEF hosting, updater, native chrome, and explicitly enabled native lifecycle targets such as `capture::lifecycle` | The daemon; frontend code that does not cross an IPC/logging seam |
+| `logs/atriumd.stderr.log` | The same background daemon as `runtime.*`, but its unleveled `eprintln!` stream: **no timestamps**, huge, `[HOOK]`-dominated | Restore/session lifecycle, fleet & activity state, scheduler, chat sidecars, FTS/vault indexing, reapers | *When* anything happened without a cross-log identity |
+| `logs/chat-runtime.<YYYY-MM-DD>.log` | Raw chat-runtime sidecar stderr mirrored by `atriumd`, timestamped in UTC and retained for 7 days | `session.start`/resume/close lifecycle, transport, engine startup stderr, queue/latency outcomes | React rendering; non-chat daemon work |
 | `logs/cef.log` | Chromium/CEF — **browser panes only**, local time | Browser pane navigation, renderer/GPU errors, media, codec issues | Anything outside a browser pane |
 | `logs/daemon-signals.log` | One line per daemon lifecycle signal, UTC, small — **read it whole** | Clean quits vs. forced kills; update handoffs | Why the daemon was slow to exit |
 | `logs/webview-errors.ndjson` (+ `.1.ndjson` when rotated at 2 MB) | Frontend JS errors, one JSON object per line | Which React subtree threw, which IPC command failed | Anything the frontend caught and handled |
@@ -375,7 +372,7 @@ Everything is under the resolved data dir unless noted. Presence varies — a fr
 | `state.json`, `workspaces/<id>/workspace.json` | Persisted app + per-workspace layout | Whether a layout was actually saved | |
 | `ipc/<channel>.lock`, `.sock` | Live daemon identity and the socket | Which daemon owns this data dir, and its pid | |
 | `adapter-registry/`, `adapters/` | Installed adapter definitions | Adapter version/schema drift | |
-| `captures/` | QA Capture recordings (`CAP-N`) | A video of the failure, if one exists — `"$CLI" capture list` | |
+| `captures/` | QA Capture bundles (`CAP-N`): `video.mov`, `transcript.jsonl`, `events.jsonl`, `chapters.json`, and `annotations.json` when produced | What was visible, narrated, clicked, flagged, and annotated — `"$CLI" capture list --json` then `capture show CAP-N --json` | App/daemon events that happened outside the recording |
 
 ### `webview-errors.ndjson` fields
 
@@ -522,67 +519,73 @@ The lines in these tables — and in **Symptom → hypothesis** below — are **
 
 ## Symptom → hypothesis
 
-For each: what would confirm it, what would rule it out, and the `area:` label.
+For each: what would confirm it, what would rule it out, and the matching `area` form value.
 
-### Blank / gray window at launch — `area:daemon` or `area:ui`
+### Blank / gray window at launch — area `daemon` or `ui`
 - **Main process crashed before the UI mounted.** Confirm: an `atrium-desktop-*.ips` timestamped at launch, Rust panic frames. Rule out: no crash report, and `runtime.<date>.log` keeps emitting INFO after boot.
 - **Two runtimes on one data dir.** Confirm: `Failed to initialize task store: … database is locked` at boot; two `atriumd` in `ps`; `ipc/<channel>.lock`'s pid not matching the live process. Rule out: one daemon, lock pid matches.
 - **CEF host died.** Confirm: `atrium Helper*.ips`; `cef.log` stops abruptly. Rule out: no browser panes open.
 - **Frontend crashed at the root.** Confirm: `webview-errors.ndjson` with `kind: react-root` at `T`. Rule out: no such record.
 - **Decisive split:** if `boot hydration: registry hydrated from disk (… N pane(s))` appears and INFO keeps flowing afterwards, the backend is alive and this is a render-side problem.
 
-### Rooms / panes did not come back after a restart — `area:persistence` or `area:daemon`
+### Rooms / panes did not come back after a restart — area `persistence` or `daemon`
 - **Daemon killed hard mid-write.** Confirm: `SIGKILL(9) reason=update-daemon-stop-timeout` in `daemon-signals.log` before the restart.
 - **Layout was never saved.** Confirm: `ERROR …persistence: Failed to save metadata …` (especially `Too many open files`) in the *previous* session's log.
 - **Restore ran but reconciled entries away.** Confirm: `boot hydration: registry hydrated from disk (… N pane(s))` with `N` far below what the user expected, plus `[fleet-hydrate] evict …` lines.
 - Rule out for all three: `N` matches expectation and no evictions → the data restored and the problem is display-side.
 
-### Terminal pane frozen, blank, or garbled — `area:pty`
+### Terminal pane frozen, blank, or garbled — area `pty`
 - **PTY spawn/resize race.** Confirm: `pane read` shows output wrapping at 80 columns in a much wider pane.
 - **Attach flow overflow.** Confirm: `attach session outbound flow overflowed … disconnecting` at `T` for that pane's shell id.
 - **The process simply exited.** Confirm: `pane read` shows a returned shell prompt or an exit notice.
 - Rule out: `pane list --json` still lists it and `pane read` returns *fresh* bytes on two calls a few seconds apart → the pane is alive and this is a rendering bug.
 
-### An agent never received / never acted on a message — `area:agents`
+### An agent never received / never acted on a message — area `agents`
 - **The submit never landed.** Confirm: `[agent-framing] submit NOT confirmed for pane <id>`. Then check the recipient's state with `pane read` — a prompt left in a shell/bash mode, or a vi-mode keymap, changes how the injected Enter is interpreted.
 - Rule out: no framing warning and `pane read` shows the message text was submitted → the agent got it and chose not to act, which is not an atrium bug.
 
-### A scheduled or recurring task did not run — `area:tasks`
+### A scheduled or recurring task did not run — area `tasks`
 - Read the inline reason on `[scheduler] card <id> fire skipped: …`. `agent not running: pane <id>` → the bound pane died; cross-check with `pane list --json`. `invalid profile: …` → cross-check `launch-profile list --json`.
 - Rule out: no `fire skipped` line at all → the schedule itself never fired; look at the card's recurrence config rather than the launch path.
 
-### Agent-chat pane stuck, lost history, or "response interrupted" — `area:chat`
-- **The sidecar died.** Confirm: `[chat-runtime-reaper] killed N orphaned runtime group(s)`, or a `session.start` whose `outcome=` is not `success`, at `T`.
+### Agent-chat pane stuck, lost history, or "response interrupted" — area `chat`
+- **The sidecar died or its engine never started.** Confirm in `chat-runtime.<date>.log`: a lifecycle record whose `outcome` is not the expected success state, or captured engine stderr at `T`. `[chat-runtime-reaper] killed N orphaned runtime group(s)` in `atriumd.stderr.log` only proves cleanup; by itself it is a consequence, not the cause.
 - **The UI and the journal disagree.** The journal at `chat/journals/<sessionKey>.jsonl` is durable and authoritative — compare its last entries against what the user says the pane showed. A journal that has content the UI never rendered is a display bug; a journal that stops where the UI stops is a transport bug.
 - Rule out: journal and UI agree and the last `session.*` call succeeded → the adapter itself ended the turn.
 
-### Browser pane blank, media broken, or clicks do nothing — `area:browser`
+### Browser pane blank, media broken, or clicks do nothing — area `browser`
 - `cef.log` is the **only** place browser panes log; if it has nothing at `T`, the pane never got that far.
 - **Renderer crash.** Confirm: an `atrium Helper*.ips` at `T`.
 - **An overlay is eating clicks.** Symptom shape: a menu, dropdown or toast opens above a browser pane and clicking an item does nothing at all (no error anywhere). Confirm: `pane list --json` shows a `browser` pane in the room, and the user was clicking an overlay drawn over it. This leaves no log trace — the absence of evidence *is* the pattern.
 
-### Update failed, app reverted, or macOS says the app is damaged — `area:updater`
+### Update failed, app reverted, or macOS says the app is damaged — area `updater`
 - Read `daemon-signals.log` around the update in full. `transactional-update-daemon-stop` and `newer-in-place-runtime-replacement` are the normal handoff; `SIGKILL(9) reason=update-daemon-stop-timeout` is not.
 - **Version disagreement.** Confirm: `"$CLI" version --json` `cli` differs from the version the app reports, or from the seed block's `version`.
 - Rule out: a clean signal sequence and matching versions → the update completed and the problem is elsewhere.
 
-### A model, effort, or adapter is missing from the launcher — `area:adapters`
+### A model, effort, or adapter is missing from the launcher — area `adapters`
 - `"$CLI" adapter list` STATUS column first — a not-ready adapter explains itself.
 - Otherwise the `script_adapter … does not match the bundled schema (continuing anyway)` WARN names the exact method and prints the rejected JSON. For this symptom that line **is** the root cause; quote it.
 
-### Vault or session search misses a session — `area:memory-vault`
+### Vault or session search misses a session — area `memory-vault`
 - Confirm: `[fts::extractor] timeout … for session <id>`, `[fts::watcher] no enumeration entry`, or `[timeline::backfill] … extract <id>: fts: extractor failed` naming that session.
 - Rule out: no extractor line for that session id → it was never enqueued; that is a different (and more interesting) bug.
 
-### Everything is a flat opaque grey, or a pane is unreadable over a wallpaper — `area:ui`
+### Everything is a flat opaque grey, or a pane is unreadable over a wallpaper — area `ui`
 - This leaves **no log trace**. Ask whether a wallpaper is set (`config.json` `theme`) — the bug is invisible without one. A pane surface that stacks two translucent layers reads as a near-opaque grey box.
 - This is a report where a screenshot from the user is worth more than any log; ask for one and say in the issue that you did.
 
+### A QA Capture failed to save, open, copy, or contains the wrong evidence — area `ui`
+- Check `app.<date>.log` for `capture::lifecycle` first. Newer builds record start/finalize outcomes plus capture-pane open routing and handled clipboard/open failures there. On older builds, its absence is expected; use `runtime.*`, `atriumd.stderr.log`, and the bundle itself.
+- Run `"$CLI" capture show CAP-N --json`, then read the small JSON/JSONL artifacts directly. A complete bundle can contain `video.mov`, `transcript.jsonl`, `events.jsonl`, `chapters.json`, and `annotations.json`; do not reduce the investigation to video existence.
+- Inspect a moment with `"$CLI" capture screenshot CAP-N --at <seconds> --out /tmp/capture.png`. Add `--crop x,y,w,h` and/or `--max-edge N` when useful. Use `capture chunk CAP-N --start <seconds> --end <seconds> --out /tmp/capture.mov` only when motion is load-bearing.
+- **Never shell out to `ffmpeg`, `ffprobe`, `sips`, or ImageMagick.** The capture CLI's screenshot/chunk/show paths are the supported native AVFoundation tools. Run `capture <verb> --help` rather than guessing flags.
+
 ### Anything else
-Say so. Class the report by the subsystem the evidence points at, or use `area:unknown` and let the maintainer route it.
+Say so. Class the report by the subsystem the evidence points at, or use area `unknown` and let the maintainer route it.
 
-## `area:` labels
+## `area` choices
 
-`area:updater`, `area:daemon`, `area:pty`, `area:browser`, `area:chat`, `area:agents`, `area:adapters`, `area:tasks`, `area:persistence`, `area:memory-vault`, `area:ui`, `area:voice`, `area:remote`, `area:cli`, `area:unknown`.
+`updater`, `daemon`, `pty`, `browser`, `chat`, `agents`, `adapters`, `tasks`, `persistence`, `memory-vault`, `ui`, `voice`, `remote`, `cli`, `unknown`.
 
 Pick one. If two genuinely apply, pick the one where the fix would land and mention the other in the body.
