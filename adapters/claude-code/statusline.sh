@@ -6,8 +6,8 @@ set -euo pipefail
 # Output: JSON to stdout, diagnostics to stderr.
 #
 # atrium takes over the single `statusLine` slot in ~/.claude/settings.json
-# so it can relay Claude Code's `rate_limits` block to the account-usage
-# chip (see statusline-relay.sh). Unlike hooks (arrays, marker-stripped),
+# so it can relay Claude Code's context/quota state to the composer meter (see
+# statusline-relay.sh). Unlike hooks (arrays, marker-stripped),
 # `statusLine` is a SINGLE object — so install preserves the user's prior
 # command in a sidecar and the relay chains to it, keeping their display.
 
