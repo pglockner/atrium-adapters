@@ -76,6 +76,17 @@ have to know about, because the default answers are scoped to this machine:
   **If you are looking for a peer agent and find none, run `--all-locations`
   before telling anyone there isn't one** — remote agents are invisible to the
   bare form, and "no other agents" is the wrong answer, not an empty result.
+- **Reading a row.** Two columns answer two different questions. `lifecycle`
+  is the process verdict from the machine that runs the pane: `running`,
+  `resuming`, `idle` (a session is recorded but nothing is running it — `agent
+  wake <id>` or a message starts it back up), `exited`, or `unknown` (the
+  runtime lives on a third machine). `status` is the activity verdict:
+  `working`, `waiting` (a live agent finished its turn and is blocked on the
+  user), `needs-permission`, `resumable` (a chat session with recorded activity
+  and no live engine — nothing is blocked on you; it is waiting to be picked
+  up), `idle` (dismissed, or nothing recorded), `exited`. `since` (`--json`) /
+  the age column is when that status began. "Who is blocked on the user right
+  now" is `status` in `waiting` / `needs-permission`, not `resumable`.
 - **Addressing.** A remote agent is `<id>@<location>` — e.g.
   `agent message 43db992e@srv1844920 "…"`. That form also reports which route
   it took. A bare `<id>` works too when it is unambiguous, and messaging is the
