@@ -62,6 +62,9 @@ jobs:
       - name: Validate kimi workspace-trust pre-accept
         run: bash tests/kimi-workspace-trust.assert.sh
 
+      - name: Validate atrium bug-report contract
+        run: bash tests/atrium-bug-report-contract.assert.sh
+
       - name: Validate immutable release metadata
         run: |
           node scripts/test-runtime-tree-digest.mjs
