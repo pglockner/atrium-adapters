@@ -124,6 +124,12 @@ have to know about, because the default answers are scoped to this machine:
 
 Nothing about driving a pane requires focus, so there's never an incidental reason to take it. Browser panes in particular: screenshots render from Chromium's own content model and a pane in another room is force-mounted offscreen on first use, so `snapshot` / `click` / `fill` / `screenshot` all work on a pane that was never visible. Don't focus a browser pane, or switch to its room, to drive it.
 
+**Closing your own pane just works — don't schedule it.** `pane close "$ATRIUM_PANE_ID"` on your own pane waits for your current turn to finish, so your final reply still lands and the pane goes after it. It reports `status: scheduled`. Do NOT hand-roll the delay with `nohup … sleep N &` or any other background job: some harnesses reap their tool shell's process group when the command returns, so the close never runs and the pane stays open. `--now` closes immediately (cutting the reply you're writing); `--after-turn` gets the same courtesy when closing somebody *else's* busy agent pane.
+
+More generally: **never background an atrium CLI call.** Run it in the foreground and read the result — a backgrounded one may be killed before it reaches atrium, and you'd have no way to know.
+
+**`pane close` reports what happened, not just that it was accepted.** `closed` = verified gone. `scheduled` = waiting on the turn. A non-zero exit means the close did NOT land — say so rather than reporting success.
+
 **Adapter-side install/config is atrium's.** Don't hand-edit files under `~/.atrium/adapters/` or seed skills yourself — reinstall the adapter from Settings instead.
 
 ## Quick examples
