@@ -57,6 +57,8 @@
         { "value": "auto", "label": "Auto" },
         { "value": "composer-2.5", "label": "Composer 2.5" },
         { "value": "composer-2.5-fast", "label": "Composer 2.5 Fast" },
+        { "value": "claude-fable-5-1-thinking-high", "label": "Fable 5.1 Thinking" },
+        { "value": "claude-fable-5-1-high", "label": "Fable 5.1" },
         { "value": "claude-fable-5-thinking-high", "label": "Fable 5 Thinking" },
         { "value": "claude-fable-5-high", "label": "Fable 5" },
         { "value": "claude-opus-5-thinking-high", "label": "Opus 5 Thinking" },
