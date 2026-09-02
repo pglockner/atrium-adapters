@@ -22,9 +22,21 @@
     {
       "key": "model",
       "label": "model",
-      "description": "--model (ids come from your Meta account's catalog)",
-      "type": "text",
-      "default": ""
+      "description": "--model",
+      "type": "select",
+      "default": "",
+      "choices": [
+        { "value": "muse-spark-1.3", "label": "Muse Spark 1.3" },
+        {
+          "value": "muse-spark-1.3-contributor",
+          "label": "Muse Spark 1.3 (shares your content)"
+        },
+        { "value": "muse-spark-1.2", "label": "Muse Spark 1.2" },
+        {
+          "value": "muse-spark-1.2-contributor",
+          "label": "Muse Spark 1.2 (shares your content)"
+        }
+      ]
     },
     {
       "key": "effort",
@@ -43,18 +55,68 @@
       ]
     },
     {
-      "key": "worktree",
-      "label": "worktree",
-      "description": "-w (run this session in a fresh git worktree)",
-      "type": "toggle",
-      "default": false
-    },
-    {
       "key": "extraArgs",
       "label": "args",
       "description": "Additional CLI arguments",
       "type": "text",
       "default": ""
+    }
+  ],
+  "suggestedFlags": [
+    {
+      "flag": "--worktree",
+      "description": "Run this session in a git worktree (bare = create)",
+      "values": ["off", "create", "existing"]
+    },
+    {
+      "flag": "--worktree-base",
+      "description": "Base ref for --worktree create (default: HEAD)"
+    },
+    {
+      "flag": "--worktree-existing",
+      "description": "Existing worktree path for --worktree existing"
+    },
+    {
+      "flag": "--permission-profile",
+      "description": "Select a named permission profile for this session"
+    },
+    {
+      "flag": "--trust-workspace",
+      "description": "Trust this workspace for this run (load its skills and rules)"
+    },
+    {
+      "flag": "--approval-judge",
+      "description": "LLM approval judge for prompt-bound calls (default: on)",
+      "values": ["on", "off"]
+    },
+    {
+      "flag": "--parallel-tool-calls",
+      "description": "Enable Meta API parallel tool calls"
+    },
+    {
+      "flag": "--no-parallel-tool-calls",
+      "description": "Disable Meta API parallel tool calls"
+    },
+    {
+      "flag": "--workspace",
+      "description": "Root policy-gated workspace tools at PATH"
+    },
+    {
+      "flag": "--preset",
+      "description": "Run a built-in preset",
+      "values": ["native-basic", "miniswe"]
+    },
+    {
+      "flag": "--agents",
+      "description": "Supply one ephemeral agent-definition overlay (JSON)"
+    },
+    {
+      "flag": "--base-url",
+      "description": "Override the Meta provider base URL"
+    },
+    {
+      "flag": "--image",
+      "description": "Attach a local image file to the next submitted prompt"
     }
   ]
 }
