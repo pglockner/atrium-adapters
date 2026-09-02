@@ -257,7 +257,7 @@ else
   printf '[PASS] list_recent_sessions schema exposes freshness metadata\n'
 fi
 
-for adapter in claude-code codex antigravity cursor-agent opencode pi grok hermes omp; do
+for adapter in claude-code codex antigravity cursor-agent opencode pi grok hermes omp muse; do
   manifest_version="$(jq -r '.version' "$ROOT/adapters/$adapter/adapter.json")"
   registry_version="$(jq -r --arg adapter "$adapter" '.adapters[] | select(.name == $adapter) | .version' "$ROOT/registry.json")"
   if [[ "$manifest_version" != "$registry_version" ]]; then

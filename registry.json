@@ -329,6 +329,34 @@
       },
       "contentSha256": "13071d4c21ac9ccbf6c49cd6eb7749ccdebfac530bd1fe165094fb81933a0516",
       "maxAppVersion": null
+    },
+    {
+      "name": "muse",
+      "displayName": "Muse Code",
+      "description": "Meta's terminal coding agent",
+      "accent": "#0064e0",
+      "binary": "muse",
+      "sdkVersion": 2,
+      "platforms": [
+        "macos",
+        "linux"
+      ],
+      "official": true,
+      "version": "1.0.2",
+      "minAppVersion": "0.309.0",
+      "iconSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\" fill-rule=\"evenodd\"><title>Muse Code</title><path d=\"M2 12 a5 5 0 1 0 10 0 a5 5 0 1 0 -10 0 Z M4.6 12 a2.4 2.4 0 1 0 4.8 0 a2.4 2.4 0 1 0 -4.8 0 Z M12 12 a5 5 0 1 0 10 0 a5 5 0 1 0 -10 0 Z M14.6 12 a2.4 2.4 0 1 0 4.8 0 a2.4 2.4 0 1 0 -4.8 0 Z\"/></svg>",
+      "install": {
+        "macos": {
+          "cmd": "curl -fsSL https://dev.meta.ai/install.sh | bash",
+          "postInstallAuth": true
+        },
+        "linux": {
+          "cmd": "curl -fsSL https://dev.meta.ai/install.sh | bash",
+          "postInstallAuth": true
+        }
+      },
+      "contentSha256": "333ecfd17017c4a6e9e06fe7106737ee5e7cc7b759585b6764b6ea64451cc76d",
+      "maxAppVersion": null
     }
   ],
   "source": {

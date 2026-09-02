@@ -186,7 +186,13 @@
       "required": ["kind", "capabilities"],
       "properties": {
         "kind": {
-          "enum": ["claude-sdk", "codex-app-server", "acp", "pi-rpc"]
+          "enum": [
+            "claude-sdk",
+            "codex-app-server",
+            "acp",
+            "pi-rpc",
+            "muse-msp"
+          ]
         },
         "args": {
           "type": "array",
@@ -230,7 +236,11 @@
             "checkpointing": { "type": "boolean" },
             "subagentEvents": { "type": "boolean" },
             "steering": { "type": "boolean" },
-            "backgroundTasks": { "type": "boolean" }
+            "backgroundTasks": { "type": "boolean" },
+            "conversationRewind": {
+              "type": "boolean",
+              "description": "Optional. Rewinding the CONVERSATION (rewind mode 'conversation'/'both') as distinct from restoring files: claude-sdk forkSession, muse-msp session/fork. Absent means the transport rewinds files only, or cannot rewind at all."
+            }
           },
           "additionalProperties": false
         }
