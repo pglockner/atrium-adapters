@@ -1,0 +1,60 @@
+{
+  "options": [
+    {
+      "key": "yolo",
+      "label": "🤠",
+      "description": "--yolo (no approvals, no sandbox, trust this workspace)",
+      "type": "toggle",
+      "default": false
+    },
+    {
+      "key": "approvalMode",
+      "label": "approvals",
+      "description": "--approval-mode",
+      "type": "select",
+      "default": "on-request",
+      "choices": [
+        { "value": "untrusted", "label": "Untrusted" },
+        { "value": "on-request", "label": "On request" },
+        { "value": "never", "label": "Never ask" }
+      ]
+    },
+    {
+      "key": "model",
+      "label": "model",
+      "description": "--model (ids come from your Meta account's catalog)",
+      "type": "text",
+      "default": ""
+    },
+    {
+      "key": "effort",
+      "label": "effort",
+      "description": "--reasoning-effort",
+      "type": "select",
+      "default": "high",
+      "choices": [
+        "none",
+        "minimal",
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "ultra"
+      ]
+    },
+    {
+      "key": "worktree",
+      "label": "worktree",
+      "description": "-w (run this session in a fresh git worktree)",
+      "type": "toggle",
+      "default": false
+    },
+    {
+      "key": "extraArgs",
+      "label": "args",
+      "description": "Additional CLI arguments",
+      "type": "text",
+      "default": ""
+    }
+  ]
+}

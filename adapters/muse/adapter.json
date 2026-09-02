@@ -1,0 +1,62 @@
+{
+  "sdkVersion": 2,
+  "name": "muse",
+  "displayName": "Muse Code",
+  "description": "Meta's terminal coding agent",
+  "accent": "#0064e0",
+  "binary": "muse",
+  "version": "1.0.2",
+  "icon": "icon.svg",
+  "skillInstallPath": "~/.config/muse/skills/atrium/SKILL.md",
+  "skillsDir": "~/.config/muse/skills",
+  "binaryDiscovery": {
+    "commands": ["muse"],
+    "wellKnownPaths": [
+      "~/.local/bin/muse",
+      "/usr/local/bin/muse",
+      "/opt/homebrew/bin/muse"
+    ]
+  },
+  "install": {
+    "macos": {
+      "cmd": "curl -fsSL https://dev.meta.ai/install.sh | bash",
+      "postInstallAuth": true
+    },
+    "linux": {
+      "cmd": "curl -fsSL https://dev.meta.ai/install.sh | bash",
+      "postInstallAuth": true
+    }
+  },
+  "methods": {
+    "list_recent_sessions": { "script": "list_recent_sessions.sh" },
+    "build_launch_command": { "script": "build_launch_command.sh" },
+    "build_resume_command": { "script": "build_resume_command.sh" },
+    "check_update": { "script": "check_update.sh" },
+    "hooks": { "script": "hooks.sh" },
+    "launcher_options": { "static": "launcher_options.json" }
+  },
+  "sessionExtractor": {
+    "script": "extract_session.sh",
+    "schemaVersion": 1,
+    "supportsDepths": ["quick", "standard"]
+  },
+  "chatTransport": {
+    "kind": "muse-msp",
+    "args": ["serve"],
+    "capabilities": {
+      "resume": true,
+      "setModel": true,
+      "thinking": true,
+      "permissionCallback": true,
+      "commandDiscovery": false,
+      "planMode": false,
+      "contextUsage": true,
+      "imageInput": true,
+      "checkpointing": true,
+      "subagentEvents": true,
+      "steering": true,
+      "backgroundTasks": true,
+      "conversationRewind": true
+    }
+  }
+}
