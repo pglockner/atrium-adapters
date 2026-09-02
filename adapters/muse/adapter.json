@@ -52,7 +52,7 @@
       "planMode": false,
       "contextUsage": true,
       "imageInput": true,
-      "checkpointing": true,
+      "checkpointing": false,
       "subagentEvents": true,
       "steering": true,
       "backgroundTasks": true,
