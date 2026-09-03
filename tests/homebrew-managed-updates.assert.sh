@@ -35,6 +35,23 @@ EOF
   chmod +x "$path"
 }
 
+make_managed_adapter_layout() {
+  local adapters_dir="$TMP/managed/adapters"
+  local artifact generation_dir
+
+  mkdir -p "$adapters_dir"
+  for artifact in claude-code codex opencode shared; do
+    generation_dir="$adapters_dir/.managed/$artifact/generations/test"
+    mkdir -p "$generation_dir"
+    cp -R "$REPO_ROOT/adapters/$artifact/." "$generation_dir/"
+    ln -s ".managed/$artifact/generations/test" "$adapters_dir/$artifact"
+  done
+
+  printf '%s\n' "$adapters_dir"
+}
+
+MANAGED_ADAPTERS_DIR="$(make_managed_adapter_layout)"
+
 assert_result() {
   local name="$1" output="$2" expected_latest="$3" expected_available="$4"
   printf '%s' "$output" | jq empty >/dev/null 2>&1 || fail "$name returned invalid JSON" "$output"
@@ -48,7 +65,7 @@ assert_result() {
 
 check_adapter() {
   local adapter="$1" binary="$2" cellar_dir="$3"
-  local script="$REPO_ROOT/adapters/$adapter/check_update.sh"
+  local script="$MANAGED_ADAPTERS_DIR/$adapter/check_update.sh"
   local brew_root="$TMP/$adapter-homebrew"
   local brew_bin="$brew_root/bin"
   local brew_tool="$brew_root/$cellar_dir/2.1.231/$binary"
