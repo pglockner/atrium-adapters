@@ -43,7 +43,7 @@
   },
   "chatTransport": {
     "kind": "muse-msp",
-    "args": ["serve", "--disable-sandbox"],
+    "args": ["serve", "--disable-sandbox", "--trust-workspace"],
     "launchEnv": {
       "MUSE_EXPERIMENTAL_WORKFLOW_API_V2_ROLLOUT": "1"
     },
