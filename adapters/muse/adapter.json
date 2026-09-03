@@ -32,6 +32,7 @@
     "build_launch_command": { "script": "build_launch_command.sh" },
     "build_resume_command": { "script": "build_resume_command.sh" },
     "check_update": { "script": "check_update.sh" },
+    "build_eval_command": { "script": "build_eval_command.sh" },
     "hooks": { "script": "hooks.sh" },
     "launcher_options": { "static": "launcher_options.json" }
   },
