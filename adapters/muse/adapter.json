@@ -43,6 +43,9 @@
   "chatTransport": {
     "kind": "muse-msp",
     "args": ["serve", "--disable-sandbox"],
+    "launchEnv": {
+      "MUSE_EXPERIMENTAL_WORKFLOW_API_V2_ROLLOUT": "1"
+    },
     "capabilities": {
       "resume": true,
       "setModel": true,
