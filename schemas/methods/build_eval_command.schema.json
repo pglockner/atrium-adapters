@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "build_eval_command output",
+  "description": "Output schema for the build_eval_command method — the adapter's non-interactive, one-shot invocation used as a hidden judge for atrium's emulated /goal and /loop. The command reads its prompt from stdin and must print the model's reply to stdout. atrium runs it OUT OF BAND: a separate process and a separate engine session, so the user's conversation is never polluted and the judge cannot be steered by the pane. Adapters that have no headless mode omit this method; atrium then falls back to count/duration-bounded loops with no completion evaluation.",
+  "type": "object",
+  "required": ["command"],
+  "properties": {
+    "command": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "The command and arguments for one headless judge turn. Must accept the prompt on STDIN and emit the reply on STDOUT. Should disable approvals/interactivity — a judge that blocks on a prompt hangs the evaluation until its timeout."
+    },
+    "acceptsPromptFile": {
+      "type": "boolean",
+      "description": "True when the command expects the prompt as a file path appended as a final argument instead of on stdin. atrium writes a temp file and appends its path."
+    }
+  },
+  "additionalProperties": false
+}
