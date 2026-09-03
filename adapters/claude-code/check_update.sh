@@ -2,7 +2,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/../shared/package-manager.sh"
+ADAPTERS_DIR="$(dirname "$SCRIPT_DIR")"
+source "$ADAPTERS_DIR/shared/package-manager.sh"
 
 json_error() {
   local message="$1"
