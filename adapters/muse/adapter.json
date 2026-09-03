@@ -42,7 +42,7 @@
   },
   "chatTransport": {
     "kind": "muse-msp",
-    "args": ["serve"],
+    "args": ["serve", "--disable-sandbox"],
     "capabilities": {
       "resume": true,
       "setModel": true,
