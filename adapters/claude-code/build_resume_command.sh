@@ -13,14 +13,36 @@ json_escape() {
   echo "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
 }
 
-CMD='["env", "DISABLE_AUTOUPDATER=1", "claude"'
+SKIP=false
 
 if command -v jq &>/dev/null; then
   SKIP="$(echo "$FLAGS" | jq -r '.dangerouslySkipPermissions // .dangerous_skip_permissions // false' 2>/dev/null)" || SKIP=false
-  if [ "$SKIP" = "true" ]; then
+else
+  # Fallback: grep for the key (skip-permissions only, mirroring launch script)
+  if echo "$FLAGS" | grep -qE '"dangerouslySkipPermissions"\s*:\s*true|"dangerous_skip_permissions"\s*:\s*true'; then
+    SKIP=true
+  fi
+fi
+
+CMD='["env", "DISABLE_AUTOUPDATER=1"'
+IS_ROOT="false"
+if [ "$SKIP" = "true" ] && [ "$(id -u)" = "0" ]; then
+  IS_ROOT="true"
+  # Claude refuses every native bypass entry point under uid 0. Keep the
+  # selected YOLO behavior through our PermissionRequest hook instead.
+  CMD="${CMD}, \"ATRIUM_CLAUDE_ROOT_BYPASS_PERMISSIONS=1\""
+fi
+CMD="${CMD}, \"claude\""
+
+if [ "$SKIP" = "true" ]; then
+  if [ "$IS_ROOT" = "true" ]; then
+    CMD="${CMD}, \"--permission-mode\", \"acceptEdits\""
+  else
     CMD="${CMD}, \"--dangerously-skip-permissions\""
   fi
+fi
 
+if command -v jq &>/dev/null; then
   MODEL="$(echo "$FLAGS" | jq -r '.model // ""' 2>/dev/null)" || MODEL=""
   if [ -n "$MODEL" ]; then
     CMD="${CMD}, \"--model\", \"$(json_escape "$MODEL")\""
@@ -36,11 +58,6 @@ if command -v jq &>/dev/null; then
     for arg in $EXTRA; do
       CMD="${CMD}, \"$(json_escape "$arg")\""
     done
-  fi
-else
-  # Fallback: grep for the key (skip-permissions only, mirroring launch script)
-  if echo "$FLAGS" | grep -qE '"dangerouslySkipPermissions"\s*:\s*true|"dangerous_skip_permissions"\s*:\s*true'; then
-    CMD="${CMD}, \"--dangerously-skip-permissions\""
   fi
 fi
 
