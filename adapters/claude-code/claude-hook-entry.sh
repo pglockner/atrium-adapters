@@ -78,5 +78,15 @@ else
         --json 2>/dev/null
 fi
 
+# Claude Code refuses its native bypass mode under uid 0. A root terminal
+# launched from an atrium YOLO profile carries this process-local marker, so
+# approve the permission request on the user's behalf without changing their
+# persisted Claude settings. AskUserQuestion is not a permission request and
+# still reaches the user, matching native bypass behavior.
+if [ "$EVENT" = "permission-request" ] \
+  && [ "${ATRIUM_CLAUDE_ROOT_BYPASS_PERMISSIONS:-}" = "1" ]; then
+  printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PermissionRequest","decision":{"behavior":"allow"}}}'
+fi
+
 # Never break the agent session on emit failure.
 exit 0
