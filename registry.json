@@ -13,8 +13,8 @@
         "linux"
       ],
       "official": true,
-      "version": "1.19.20",
-      "minAppVersion": "0.228.0",
+      "version": "1.19.21",
+      "minAppVersion": "0.310.1",
       "models": [
         "fable",
         "opus",

@@ -15,38 +15,60 @@ write_fake_id() {
 
 assert_root_command() {
   local output="$1"
-  jq -e '
-    .command[0:5] == [
+  local browser_path="$2"
+  jq -e --arg browser_path "$browser_path" '
+    .command[0:6] == [
       "env",
       "DISABLE_AUTOUPDATER=1",
+      ("BROWSER=" + $browser_path),
       "ATRIUM_CLAUDE_ROOT_BYPASS_PERMISSIONS=1",
       "claude",
       "--permission-mode"
     ]
-    and .command[5] == "acceptEdits"
+    and .command[6] == "acceptEdits"
     and (.command | index("--dangerously-skip-permissions") == null)
   ' <<<"$output" >/dev/null
 }
 
 write_fake_id 0
-root_launch="$(PATH="$TMP:$REAL_PATH" "$ADAPTER/build_launch_command.sh" \
+browser_path="$TMP/atrium data/adapters/claude-code/open_browser.sh"
+root_launch="$(ATRIUM_DATA_DIR="$TMP/atrium data" PATH="$TMP:$REAL_PATH" "$ADAPTER/build_launch_command.sh" \
   '{"dangerouslySkipPermissions":true,"model":"sonnet","effort":"medium"}')"
-assert_root_command "$root_launch"
+assert_root_command "$root_launch" "$browser_path"
 
-root_resume="$(PATH="$TMP:$REAL_PATH" "$ADAPTER/build_resume_command.sh" \
+root_resume="$(ATRIUM_DATA_DIR="$TMP/atrium data" PATH="$TMP:$REAL_PATH" "$ADAPTER/build_resume_command.sh" \
   session-123 '{"dangerouslySkipPermissions":true,"model":"sonnet"}')"
-assert_root_command "$root_resume"
+assert_root_command "$root_resume" "$browser_path"
 jq -e '.command[-2:] == ["--resume", "session-123"]' \
   <<<"$root_resume" >/dev/null
 
 write_fake_id 501
-non_root_launch="$(PATH="$TMP:$REAL_PATH" "$ADAPTER/build_launch_command.sh" \
+non_root_launch="$(ATRIUM_DATA_DIR="$TMP/atrium data" PATH="$TMP:$REAL_PATH" "$ADAPTER/build_launch_command.sh" \
   '{"dangerouslySkipPermissions":true}')"
-jq -e '
+jq -e --arg browser_path "$browser_path" '
   (.command | index("--dangerously-skip-permissions") != null)
+  and (.command | index("BROWSER=" + $browser_path) != null)
   and (.command | index("ATRIUM_CLAUDE_ROOT_BYPASS_PERMISSIONS=1") == null)
   and (.command | index("acceptEdits") == null)
 ' <<<"$non_root_launch" >/dev/null
+
+cat >"$TMP/atrium-browser-probe" <<'EOF'
+#!/usr/bin/env bash
+printf '%s\n' "$@" >"$ATRIUM_TEST_ARGS"
+cat >"$ATRIUM_TEST_STDIN"
+EOF
+chmod +x "$TMP/atrium-browser-probe"
+
+auth_url='https://claude.com/oauth/authorize?redirect_uri=http%3A%2F%2Flocalhost%3A38249%2Fcallback'
+ATRIUM_TEST_ARGS="$TMP/browser-args" \
+ATRIUM_TEST_STDIN="$TMP/browser-stdin" \
+ATRIUM_CLI_PATH="$TMP/atrium-browser-probe" \
+ATRIUM_PANE_ID="pane-123" \
+  "$ADAPTER/open_browser.sh" --new-window "$auth_url"
+diff -u <(printf '%s\n' hook emit auth-browser-open --adapter claude-code --pane-id pane-123) \
+  "$TMP/browser-args"
+jq -e --arg url "$auth_url" '.atrium_browser_auth_url == $url' \
+  "$TMP/browser-stdin" >/dev/null
 
 cat >"$TMP/atrium" <<'EOF'
 #!/usr/bin/env bash

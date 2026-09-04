@@ -24,7 +24,8 @@ else
   fi
 fi
 
-CMD='["env", "DISABLE_AUTOUPDATER=1"'
+BROWSER_PATH="${ATRIUM_DATA_DIR:-$HOME/.atrium}/adapters/claude-code/open_browser.sh"
+CMD="[\"env\", \"DISABLE_AUTOUPDATER=1\", \"BROWSER=$(json_escape "$BROWSER_PATH")\""
 IS_ROOT="false"
 if [ "$SKIP" = "true" ] && [ "$(id -u)" = "0" ]; then
   IS_ROOT="true"
