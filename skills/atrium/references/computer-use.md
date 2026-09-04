@@ -4,7 +4,7 @@ Only for a prompt carrying the `computer-use:on` chip. Run everything through `"
 
 ## Fast path
 
-Never start with `computer status`, `ps`, AppleScript, or direct driver calls — they add turns and bypass atrium's authority model.
+Never start with `computer status` (diagnostics, for after a failed start), `ps`, AppleScript, or direct driver calls — they add turns and bypass atrium's authority model.
 
 ```bash
 "$ATRIUM_CLI_PATH" computer start --scope auto --json
