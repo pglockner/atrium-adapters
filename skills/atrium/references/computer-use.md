@@ -26,6 +26,8 @@ Never start with `computer status` (diagnostics, for after a failed start), `ps`
 A batch step is `{tool, element | label (+role), args}`. `tool` is snake_case in JSON (kebab-case on the CLI); `args` uses the driver's key names. Unknown keys are rejected; `label` must match **exactly** and hit exactly one element. atrium owns `session`, `pid`, `window_id`, `scope`, `delivery_mode`, `element_token`, `element_index`, `snapshot_id`, `observe_window_changes` — passing one is an error.
 
 ```bash
+"$ATRIUM_CLI_PATH" computer batch --pid <pid> --window-id <id> --json --steps '<array below>'
+
 # form fill — set_value takes `value`
 [{"tool":"set_value","label":"First name","args":{"value":"Ada"}},
  {"tool":"set_value","label":"Last name","args":{"value":"Lovelace"}},
@@ -45,15 +47,16 @@ One batch resolves every target from one fresh projection and returns one compac
 `computer verify --expect` takes 1–8 predicates, ANDed, each `{"element":{…}}` or `{"window":{…}}`. Element: `selector` (`role`, `label_contains`) plus `exists` (`true` only — absence is unprovable), `value_equals`, `enabled`, `selected`. Window: `exists`, `bounds` (`x`,`y`,`width`,`height`,`tolerance_px`). No negation, no OR.
 
 ```bash
---expect '[{"element":{"selector":{"label_contains":"Lovelace"},"exists":true}},
-           {"element":{"selector":{"role":"AXButton","label_contains":"Save"},"enabled":false}}]'
+"$ATRIUM_CLI_PATH" computer verify --pid <pid> --window-id <id> --json \
+  --expect '[{"element":{"selector":{"label_contains":"Lovelace"},"exists":true}},
+             {"element":{"selector":{"role":"AXButton","label_contains":"Save"},"enabled":false}}]'
 ```
 
 `unknown` never means success. Treat `effect`, `evidence`, `escalation` as authoritative; never claim success from a click response alone. A value that renders but isn't in the tree can't be verified this way — `computer zoom` a crop and read the image (`--out` must end `.jpg`/`.jpeg`/`.png`).
 
 ## Foreground and desktop
 
-Window actions are background and don't steal focus. On a foreground recommendation, or a fresh observation confirming a background no-op, retry that one action with `--foreground`: atrium asks, serializes it, and restores the prior frontmost app. Desktop scope is never an implicit fallback — it needs `computer start --scope desktop` with a user grant, or `computer call escalate_session` once the window ladder is exhausted, and uses screen-absolute coordinates under a global lock.
+Window actions are background and don't steal focus. On a foreground recommendation, or a fresh observation confirming a background no-op, retry that one action with `--foreground`: atrium asks, serializes it, and restores the prior frontmost app. Desktop scope is never an implicit fallback — it needs `computer start --scope desktop` with a user grant, or `computer call escalate_session --args '{"reason":"…"}'` once the window ladder is exhausted, and uses screen-absolute coordinates under a global lock.
 
 ## Browser work
 
