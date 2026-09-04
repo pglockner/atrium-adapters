@@ -46,6 +46,8 @@ One batch resolves every target from one fresh projection and returns one compac
 
 `computer verify --expect` takes 1–8 predicates, ANDed, each `{"element":{…}}` or `{"window":{…}}`. Element: `selector` (`role`, `label_contains`) plus `exists` (`true` only — absence is unprovable), `value_equals`, `enabled`, `selected`. Window: `exists`, `bounds` (`x`,`y`,`width`,`height`,`tolerance_px`). No negation, no OR.
 
+It is a bounded poll, not one sample: the driver waits `timeout_ms` (default 5000, max 10000) for `stable_samples` consecutive satisfied reads (default 2, range 1–5), and `timeout_ms: 0` forces `stable_samples: 1`. The CLI does not expose those two flags yet, so you get the defaults — `verify` already absorbs a few seconds of UI settling for you.
+
 ```bash
 "$ATRIUM_CLI_PATH" computer verify --pid <pid> --window-id <id> --json \
   --expect '[{"element":{"selector":{"label_contains":"Lovelace"},"exists":true}},
