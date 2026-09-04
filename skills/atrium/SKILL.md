@@ -263,7 +263,7 @@ When the user references a CAP-# (assigns a capture task, drops `CAP-381`, asks 
 
 ## Native computer use
 
-When the prompt contains the explicit `computer-use:on` chip and the task requires a native app or the visible desktop, drive it through `"$ATRIUM_CLI_PATH" computer …`. **Before the first computer-use command in a turn, read `references/computer-use.md`.** It contains the low-latency discovery/attach path, snapshot and batching rules, foreground/desktop escalation, browser and native-menu tools, concurrency guarantees, protected surfaces, audit behavior, and cleanup contract.
+When the prompt contains the explicit `computer-use:on` chip and the task requires a native app or the visible desktop, drive it through `"$ATRIUM_CLI_PATH" computer …`. For anything on the **web**, prefer an atrium browser pane over driving a browser natively. **Before the first computer-use command in a turn, read `references/computer-use.md`.** It contains the discovery/attach path, how to actually see the screenshot `observe` writes, the batch and verify grammars with examples, foreground/desktop escalation, browser guidance, protected surfaces, an error→next-command table, and the cleanup contract.
 
 Never invoke `cua-driver` directly, edit computer-use state files, start its daemon yourself, or substitute GUI shell automation. atrium owns daemon lifecycle, exact-process authorization, leases, approvals, cursor/PiP transparency, audit logging, and multi-agent coordination.
 
