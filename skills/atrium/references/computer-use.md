@@ -13,11 +13,11 @@ Never start with `computer status` (diagnostics, for after a failed start), `ps`
 "$ATRIUM_CLI_PATH" computer observe --pid <pid> --window-id <id> --full --json
 ```
 
-`start` boots the shared daemon. `apps` lists running apps **without windows** (`--installed` also scans not-running apps; slower). `attach` authorizes the exact process, blocks PID reuse, and does return that app's windows. `launch --bundle-id …` (only if the app isn't running) returns `windows: []`, so a launch always needs `computer windows --pid <pid>` first. App entries carry executable path, working directory, worktree root, and atrium instance where exposed — use them when several processes share a name. Attach once and keep that PID; never hand-write `computer-use/state.json`.
+`start` boots the shared daemon. `apps` returns running apps **plus a top-level `windows` array** (`window_id`, `pid`, `app_name`, `title`) — the per-app entries carry no windows, so read the top-level array (`--installed` also scans not-running apps; slower). `attach` authorizes the exact process, blocks PID reuse, and returns that app's windows. `launch --bundle-id …` (only if the app isn't running) may return `windows: []` — it polls on a 250 ms tick and can return before the window is drawn — so run `computer windows --pid <pid>` when it does. App entries carry executable path, working directory, worktree root, and atrium instance where exposed — use them when several processes share a name. Attach once and keep that PID; never hand-write `computer-use/state.json`.
 
 ## Seeing the screenshot
 
-`observe` returns no image, only `screenshotFilePath`. Pixels reach the model only if you read that path with your own file tool: **Claude Code / Claude SDK → `Read`; Codex → `view_image`; grok, opencode → `read_file`.** For several looks, use one shell call writing N shots, then N parallel image reads. `--no-screenshot` is the cheap default for AX-addressed work; spend pixels on what the tree can't answer (rendered values, canvas, web content).
+`observe` returns no image, only `screenshotFilePath`. Pixels reach the model only if you read that path with your own file tool: **Claude Code / Claude SDK → `Read`; Codex → `view_image`; grok → `read_file`; opencode → `read`.** For several looks, use one shell call writing N shots, then N parallel image reads. `--no-screenshot` is the cheap default for AX-addressed work; spend pixels on what the tree can't answer (rendered values, canvas, web content).
 
 ## Observe, act, batch
 
@@ -40,7 +40,11 @@ A batch step is `{tool, element | label (+role), args}`. `tool` is snake_case in
 [{"tool":"scroll","element":"e:31c8","args":{"direction":"down","amount":2}}]
 ```
 
-One batch resolves every target from one fresh projection and returns one compact final observation, so pack in as many independent ordered steps as you can. It halts on a refused, partial, or suspected-no-op step. Split only when a step changes the target the next one needs — anything a scroll reveals needs a fresh observe. Shortcuts that switch app, tab, or Space (cmd+L, cmd+tab, cmd+space, cmd+1-9, ctrl+arrow, cmd+shift+G) are refused; use a semantic operation.
+The one-projection fast path needs **every** step to be `click`, `type_text`, `press_key`, `hotkey`, `scroll`, or `drag` — it is all-or-nothing. One `set_value`, `double_click`, `right_click`, or `set_window_frame` drops the whole batch to verified-stepwise, re-walking the tree per step. So the form-fill example above is stepwise; batch it anyway, just don't expect fast-path timings.
+
+Pack in as many independent ordered steps as you can. A batch halts on a refused, partial, or suspected-no-op step. Split only when a step changes the target the next one needs — anything a scroll reveals needs a fresh observe.
+
+Refused outright: shortcuts that switch app, tab, or Space — cmd+L, cmd+shift+G, cmd+tab, alt+tab, cmd+[, cmd+], cmd+1-9, cmd+space, ctrl+arrow, ctrl+backtick — and modified pointer clicks (a `modifiers` array on `click`/`double_click`/`right_click`) unless you pass `--foreground`. Use a semantic operation instead. Not refused but approval-gated: cmd+Q, cmd+W, cmd+Delete, cmd+Backspace, which can quit an app, close a window, or delete content.
 
 ## Verify
 
@@ -90,8 +94,9 @@ atrium itself is controllable. Terminals (including embedded ones), other AI-age
 | `degradedReason: ax_window_unresolved` | Retry with `--foreground`; observe again once the window settles |
 | `the user denied computer use` | Stop and ask the user; never retry or find another route |
 | `computer use is stopped` (kill switch) | Just run the verb — it raises a **Re-enable** approval for the user |
-| `cua-driver … failed` / daemon unreachable | `computer start --scope auto --json`, retry; report any `installHint` |
-| `computer use cannot control '<app>'` | Protected. Hand that step to the user |
+| `cua-driver … failed` / daemon unreachable | `computer start --scope auto --json`, then retry |
+| `cua-driver is unavailable` (not installed) | `computer status --json` — only that reports `installHint`; relay it |
+| ``computer use cannot control `<app>` `` | Protected. Hand that step to the user |
 | `browser_requires_setup` / `browser_consent_required` | No tab-level route. Use an atrium browser pane |
 
 ## Transparency and cleanup
