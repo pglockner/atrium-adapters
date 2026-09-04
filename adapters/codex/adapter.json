@@ -115,7 +115,8 @@
       "checkpointing": false,
       "subagentEvents": true,
       "steering": true,
-      "backgroundTasks": true
+      "backgroundTasks": true,
+      "toolImageRead": true
     }
   }
 }
