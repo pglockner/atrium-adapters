@@ -43,6 +43,13 @@
       "sha256": "57f793cbee2fa4d99a46b1b675ab6401aa5248738d995e76a912be40f1490588"
     },
     {
+      "id": "atrium-skill-computer-client",
+      "remotePath": "skills/atrium/references/computer-client.md",
+      "target": "adapter-skill-reference",
+      "destName": "computer-client.md",
+      "sha256": "fb8ab8fafd7a0b48103dda3a1c0ef56904fdfb84166d5e70aa33bbfd2c619b0b"
+    },
+    {
       "id": "atrium-skill-teaching",
       "remotePath": "skills/atrium/references/teaching-mode.md",
       "target": "adapter-skill-reference",

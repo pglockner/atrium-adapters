@@ -263,7 +263,7 @@ When the user references a CAP-# (assigns a capture task, drops `CAP-381`, asks 
 
 ## Native computer use
 
-When the prompt contains the explicit `computer-use:on` chip and the task requires a native app or the visible desktop, drive it through `"$ATRIUM_CLI_PATH" computer …`. For anything on the **web**, prefer an atrium browser pane over driving a browser natively. It is two calls — `computer observe --app "<name>"` then `computer do --steps '[…]'` — and **before the first one in a turn, read `references/computer-use.md`**: the projection and step grammars, how to get pixels, the verify bounds, escalation, browser guidance, protected surfaces, and the cleanup contract.
+When the prompt contains the explicit `computer-use:on` chip and the task requires a native app or the visible desktop, use atrium's `computer_*` tools or `"$ATRIUM_CLI_PATH" computer …`. For web tasks, prefer an atrium browser pane. **Before the first native operation in a turn, read `references/computer-use.md`** for the image/action loop, optional programmatic client, current-image coordinates, verification, recovery and cleanup. Action results can provide the next usable observation; inspect them before choosing more input.
 
 Never invoke `cua-driver` directly, edit computer-use state files, start its daemon yourself, or substitute GUI shell automation. atrium owns daemon lifecycle, exact-process authorization, leases, approvals, cursor/PiP transparency, audit logging, and multi-agent coordination.
 
