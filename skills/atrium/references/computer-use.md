@@ -47,11 +47,16 @@ Verbs `click double right set type key hotkey scroll drag` take `{ref|label(+rol
 
 ## When something fails
 
-**Every error carries `next`. Run it verbatim** — it is the exact recovering command. Two it cannot fix: `the user denied computer use` (stop and ask) and ``cannot control `<app>` `` (protected surface; hand that step over).
+**Every error carries `next`. Run it verbatim** — it is the exact recovering command. Four no retry can fix:
+
+- `the user denied computer use` — stop and ask what they want instead.
+- ``cannot control `<app>` `` — a protected surface. Hand that step over.
+- `outside_ceiling` — the app is not on the user's allowlist, which the driver itself enforces. Ask them to allow it (`computer allow add "<app>"`, or Settings → Computer Use).
+- `tier_denied` — the app is allowed, but not that far. `clickOnly` (terminals and IDEs are pinned there) allows pointer actions and refuses typing; `viewOnly` allows only observation. Say what you needed to type.
 
 ## Escalation, browsers, trust
 
-Window actions are background and steal no focus; `--foreground` retries one in front, with a prompt. Desktop scope needs `computer start --scope desktop`.
+Window actions are background and steal no focus; `--foreground` retries one in front, with a prompt. Desktop scope needs `computer start --scope desktop`. **Observing never prompts** — only synthetic input asks, once per app per session.
 
 **Prefer an atrium browser pane for web work.** Natively you get the accessibility tree (`route:"ax"`); the semantic page snapshot needs profile consent that is not wired up. `computer navigate` is an OS URL handoff that opens a *new window* and stacks more on repeat — avoid it on Arc.
 
