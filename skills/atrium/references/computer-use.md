@@ -20,15 +20,15 @@ e1 TextField "First name" ="Ada" @412,138 260x24
 e2 Button "Save" @980,612 84x28
 ```
 
-`@x,y WxH` is window-relative in the screenshot's own pixels: pass those numbers straight back as `x`/`y`. `--query` filters, `--all` adds the rest, `--budget` caps it (default 2000 tokens), `--full` gives whole objects, `--diff` compares to the last snapshot.
+`@x,y WxH` is window-relative, in the pixels of the image this call handed you — including after `--inline-image` shrinks it — so pass them straight back as `x`/`y`. `--query` filters, `--all` adds the rest, `--budget` caps it by rank (default 2000 tokens), `--full` gives whole objects, `--diff` compares to the last snapshot.
 
-**Refs are per-snapshot.** `e3` is the third element of *that* observation; an older ref is refused as `stale_ref`. `--full` also prints an `f:…` fingerprint, which survives re-observation.
+**Refs are per-snapshot.** `e3` is the third element of *that* observation. A ref from an earlier one is refused as `stale_ref` naming what it was and where it went, never re-pointed at whatever moved into the slot. `--full` also prints an `f:…` fingerprint, which survives re-observation.
 
 **Pixels.** `--inline-image` returns the shot as base64 in `shot.data`, downscaled to `--max-long-edge` (default 640). Otherwise you get `shot.path` and must read it yourself — Claude Code/SDK `Read`, Codex `view_image`, opencode `read`, grok `read_file`. `computer zoom` gets detail.
 
 ## Acting
 
-One observation authorizes one action. Every action returns `after` — the same projection plus `changed` refs — so you never look twice to see what happened, but you do need a fresh `observe` (or a `do`) before the *next* action. `effect` is `confirmed`, `mismatch` or `unverifiable`, read back rather than guessed. `computer action <tool>` targets `--element e2`, `--label "Save" [--role AXButton]`, or `x`/`y` in `--args`.
+One observation authorizes one action. Every action returns `after` — the same projection plus `changed` refs — so you never look twice to see what happened, but you do need a fresh `observe` (or a `do`) before the *next* action. `effect` is `confirmed`, `mismatch` or `unverifiable`, read back rather than guessed. If the window is gone by the time `after` is read the action still succeeded — `after` is null, `afterError` says why — so do not retry it. `computer action <tool>` targets `--element e2`, `--label "Save" [--role AXButton]`, or `x`/`y` in `--args`; a label matching nothing is `no_match`, two is `ambiguous_selector`.
 
 `computer do` runs several steps against one observation under one lock, with per-step results and a halt that reports what already ran. A step is one verb key holding a selector, plus its payload.
 
@@ -39,7 +39,7 @@ One observation authorizes one action. Every action returns `after` — the same
 [{"invoke_menu":{"path":["File","Export…"]}},{"screenshot":true}]
 ```
 
-Verbs `click double right set type key hotkey scroll drag` take `{ref|label(+role)|label_contains|xy}`; `invoke_menu wait_ms screenshot zoom expect` stand alone. Payloads: `value`, `text`, `keys`, `direction`/`by`/`amount`, `to`/`to_xy`. Any step may add `expect` and `foreground:true` (which prompts, exactly as `action --foreground` does). A selector matching two elements is refused — add `role` or use a ref.
+Verbs `click double right set type key hotkey scroll drag` take `{ref|label(+role)|label_contains|xy}`; `invoke_menu wait_ms screenshot zoom expect` stand alone (`invoke_menu` and `zoom` take either the object or the bare array). Payloads: `value`, `text`, `keys`, `direction`/`by`/`amount`, `to`/`to_xy`. Any step may add `expect` and `foreground:true` (which prompts, exactly as `action --foreground` does). A selector matching two elements is refused — add `role` or use a ref.
 
 ## Verify
 
