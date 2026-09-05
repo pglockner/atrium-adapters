@@ -50,9 +50,9 @@ Verbs `click double right set type key hotkey scroll drag` take `{ref|label(+rol
 **Every error carries `next`. Run it verbatim** — it is the exact recovering command. Four no retry can fix:
 
 - `the user denied computer use` — stop and ask what they want instead.
-- ``cannot control `<app>` `` — a protected surface. Hand that step over.
-- `outside_ceiling` — the app is not on the user's allowlist, which the driver itself enforces. Ask them to allow it (`computer allow add "<app>"`, or Settings → Computer Use).
-- `tier_denied` — the app is allowed, but not that far. `clickOnly` (terminals and IDEs are pinned there) allows pointer actions and refuses typing; `viewOnly` allows only observation. Say what you needed to type.
+- ``cannot control `<app>` `` — a protected surface: other AI-agent apps (atrium included), terminals and script hosts. Not allowable at any tier. Hand that step over.
+- `outside_ceiling` — the app is not on the user's allowlist, which the driver itself enforces. Ask them to allow it (`computer allow add "<app>"`, or Settings → Computer Use). A bundle id is matched exactly, case included.
+- `tier_denied` — the app is allowed, but not that far. `clickOnly` allows pointer actions and refuses typing; `viewOnly` allows only observation. Say what you needed to type.
 
 ## Escalation, browsers, trust
 
