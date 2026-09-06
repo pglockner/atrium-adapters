@@ -40,7 +40,7 @@
       "remotePath": "skills/atrium/references/computer-use.md",
       "target": "adapter-skill-reference",
       "destName": "computer-use.md",
-      "sha256": "796b7141dc625c5a06f1038593cf53e4cc1c8e50ae2b8507b60992191e8bedad"
+      "sha256": "b52c7a30a4f4f7c69934b29641dcef68b9deb6b1f4dbca4ce0ff51200f716b37"
     },
     {
       "id": "atrium-skill-computer-client",
@@ -94,7 +94,7 @@
   ],
   "source": {
     "repository": "jonnyasmar/atrium-adapters",
-    "commit": "85451712a9b83f0eecd2c31e6ecf71be012b52ac",
-    "generation": 45
+    "commit": "11e24cd5b5a3850faa9fd7d4f7a92f3b36112560",
+    "generation": 46
   }
 }
