@@ -1,12 +1,12 @@
 # Native computer use
 
-Use with the `computer-use:on` chip through `computer_*` tools or `"$ATRIUM_CLI_PATH" computer … --json`. Never bypass atrium's controls with `cua-driver`, AppleScript or `open -a`.
+Use `computer_*` tools or `"$ATRIUM_CLI_PATH" computer … --json`. The `computer-use:on` chip arms the pane; explicit user authorization to activate it permits doing so through atrium's UI. Never bypass atrium's controls with `cua-driver`, AppleScript or `open -a`.
 
 ## Interface
 
 Prefer `computer_observe`, `computer_act`, `computer_do`, `computer_verify`, `computer_zoom`, `computer_end`: image blocks plus text and structured results. A path or base64 text is not a viewed image.
 
-For code composition, read [computer-client.md](computer-client.md) and define its `createComputer` function in the host executor. Bind actual discovered tools; preserve image blocks and original-detail metadata. Reuse the client or retain `pid`/`win`. Await calls; bound recovery loops and avoid parallel operations on one window. Failed calls, mismatched readback and unconfirmed verification throw with `error.result`/`error.data`, stopping subsequent statements without retrying input.
+For code composition, read [computer-client.md](computer-client.md) and define `createComputer` in the host executor. Bind discovered tools; preserve image blocks and original-detail metadata. Retain the client or `pid`/`win`. Await calls; bound recovery and serialize window operations. Failures, mismatched readback and unconfirmed verification throw with `error.result`/`error.data`, stopping subsequent statements without retrying input.
 
 CLI fallback:
 
@@ -30,7 +30,7 @@ Use visible labels/refs for identifiable controls and image coordinates for visu
 
 Input consumes its observation's lease. Successful after-capture returns a **new** `after` observation and image with `readyForAction:true`; use those refs and coordinates for the next action without another observe. Ownership, expiry and target checks still apply. Observe again if `readyForAction:false`, after a timeout, missing after-state, expired lease or external UI change. Older builds omit `readyForAction`; observe before the next action there.
 
-Refs belong to one snapshot: use the newest, never carry ordinals across observations by assumption. Full objects expose `f:…` fingerprints. `no_match`/`ambiguous_selector` need fresh inspection or a narrower `role`.
+Refs belong to one snapshot: use the newest. Full objects expose `f:…` fingerprints. `no_match`/`ambiguous_selector` need fresh inspection or a narrower `role`.
 
 ## Pixels and detail
 

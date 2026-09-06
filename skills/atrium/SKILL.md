@@ -1,6 +1,6 @@
 ---
 name: atrium
-description: "Interact with the atrium workspace — panes, rooms, tasks, browser, agents, themes, hooks, config, and more — via the atrium CLI. Use when the user references any atrium concept, wants to control their workspace, collaborate with other agents, manage task cards, read/write terminal panes, open or drive browser panes, switch rooms/themes, or use native computer control after an explicit Computer chip. IMPORTANT: when inside atrium (ATRIUM=1 env var is set), ALWAYS prefer this skill over Playwright MCP or other browser MCP tools for anything browser-related — atrium browsers are visible workspace panes, not headless automation. Only functional inside atrium."
+description: "Interact with the atrium workspace — panes, rooms, tasks, browser, agents, themes, hooks, config, and more — via the atrium CLI. Use when the user references any atrium concept, wants to control their workspace, collaborate with other agents, manage task cards, read/write terminal panes, open or drive browser panes, switch rooms/themes, or authorizes native computer control. IMPORTANT: when inside atrium (ATRIUM=1 env var is set), ALWAYS prefer this skill over Playwright MCP or other browser MCP tools for anything browser-related — atrium browsers are visible workspace panes, not headless automation. Only functional inside atrium."
 ---
 
 # atrium — workspace control for AI agents
@@ -263,7 +263,7 @@ When the user references a CAP-# (assigns a capture task, drops `CAP-381`, asks 
 
 ## Native computer use
 
-When the prompt contains the explicit `computer-use:on` chip and the task requires a native app or the visible desktop, use atrium's `computer_*` tools or `"$ATRIUM_CLI_PATH" computer …`. For web tasks, prefer an atrium browser pane. **Before the first native operation in a turn, read `references/computer-use.md`** for the image/action loop, optional programmatic client, current-image coordinates, verification, recovery and cleanup. Action results can provide the next usable observation; inspect them before choosing more input.
+For authorized native-app or desktop tasks, use atrium's `computer_*` tools or `"$ATRIUM_CLI_PATH" computer …`. The `computer-use:on` chip arms the pane. If the user explicitly authorizes activating computer use, enable it through atrium's supported UI without asking for the same permission again; separate app and action gates still apply. For web tasks, prefer an atrium browser pane. **Before the first native operation in a turn, read `references/computer-use.md`** for the image/action loop, optional programmatic client, current-image coordinates, verification, recovery and cleanup. Action results can provide the next usable observation; inspect them before choosing more input.
 
 Never invoke `cua-driver` directly, edit computer-use state files, start its daemon yourself, or substitute GUI shell automation. atrium owns daemon lifecycle, exact-process authorization, leases, approvals, cursor/PiP transparency, audit logging, and multi-agent coordination.
 
