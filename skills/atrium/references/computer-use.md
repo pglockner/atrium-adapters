@@ -15,7 +15,7 @@ CLI fallback:
 "$ATRIUM_CLI_PATH" computer action click --label "New contact" --json
 ```
 
-`--app` accepts bundle id, name, unique fragment or pid; it starts, attaches and binds a window. Subsequent calls can omit it. `--window <id|title-fragment>` chooses another.
+`--app` selects a running app by bundle id, name, fragment or pid and starts its session. Launch absent apps with `computer launch --bundle-id …`. Later calls can omit the target; `--window <id|title-fragment>` chooses another window.
 
 ## Observe, act, inspect
 
@@ -26,7 +26,7 @@ e1 TextField "First name" ="Ada" @412,138 260x24
 e2 Button "Save" @980,612 84x28
 ```
 
-Use visible labels/refs for identifiable controls and image coordinates for visual controls or incomplete trees. Inspect pixels when appearance matters. `--query` filters, `--all` adds roles, `--budget` caps text, `--full` includes objects, `--diff` reports changes. Omission is not absence.
+Use labels/refs for identifiable controls and image coordinates for visual controls or incomplete trees. `--query` filters, `--all` adds roles, `--budget` caps text, `--full` includes objects, `--diff` reports changes. Omission is not absence.
 
 Input consumes its observation's lease. Successful after-capture returns a **new** `after` observation and image with `readyForAction:true`; use those refs and coordinates for the next action without another observe. Ownership, expiry and target checks still apply. Observe again if `readyForAction:false`, after a timeout, missing after-state, expired lease or external UI change. Older builds omit `readyForAction`; observe before the next action there.
 
