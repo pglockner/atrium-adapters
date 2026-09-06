@@ -5,7 +5,7 @@
   "description": "Oh My Pi — extended pi-fork coding agent by can1357 (omp.sh)",
   "accent": "#f97316",
   "binary": "omp",
-  "version": "16.4.8",
+  "version": "16.4.9",
   "updateCommand": [
     "omp",
     "update"
@@ -27,15 +27,15 @@
   },
   "install": {
     "macos": {
-      "cmd": "npm install -g bun @oh-my-pi/pi-coding-agent",
+      "cmd": "npm install -g --allow-scripts=bun bun @oh-my-pi/pi-coding-agent",
       "postInstallAuth": true
     },
     "linux": {
-      "cmd": "npm install -g bun @oh-my-pi/pi-coding-agent || { echo \"atrium: npm global prefix not writable; retrying under ~/.local\"; npm install -g --prefix \"$HOME/.local\" bun @oh-my-pi/pi-coding-agent; }",
+      "cmd": "npm install -g --allow-scripts=bun bun @oh-my-pi/pi-coding-agent || { echo \"atrium: npm global prefix not writable; retrying under ~/.local\"; npm install -g --allow-scripts=bun --prefix \"$HOME/.local\" bun @oh-my-pi/pi-coding-agent; }",
       "postInstallAuth": true
     },
     "windows": {
-      "cmd": "npm install -g bun @oh-my-pi/pi-coding-agent",
+      "cmd": "npm install -g --allow-scripts=bun bun @oh-my-pi/pi-coding-agent",
       "postInstallAuth": true
     }
   },

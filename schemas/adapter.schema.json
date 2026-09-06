@@ -208,6 +208,28 @@
           "description": "Optional arguments appended when launching the chat transport.",
           "items": { "type": "string" }
         },
+        "managedRuntime": {
+          "type": "string",
+          "description": "Optional. Names a runtime atrium downloads and owns, for transports whose server is a separate executable from the adapter's `binary` (e.g. antigravity's ACP server is not `agy`). Resolution order is user override path, then managed install, then `binaryDiscovery`.",
+          "minLength": 1
+        },
+        "binaryDiscovery": {
+          "type": "object",
+          "description": "Optional. Locates a transport server that is a different executable from the adapter's top-level `binary`. Same semantics as the top-level `binaryDiscovery`. Omitted transports launch the adapter's own binary.",
+          "properties": {
+            "commands": {
+              "type": "array",
+              "description": "Candidate binary names to search on PATH, in priority order.",
+              "items": { "type": "string", "minLength": 1 }
+            },
+            "wellKnownPaths": {
+              "type": "array",
+              "description": "Absolute or ~-prefixed fallback paths probed when no command resolves on PATH.",
+              "items": { "type": "string", "minLength": 1 }
+            }
+          },
+          "additionalProperties": false
+        },
         "capabilities": {
           "type": "object",
           "required": [
