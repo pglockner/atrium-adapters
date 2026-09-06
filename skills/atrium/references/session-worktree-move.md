@@ -16,6 +16,8 @@ The command schedules preparation and returns immediately. **Finish your current
 - `--status` reads the last move's actual result. `--cancel` cancels before the conversation starts switching. A prepared worktree stays available.
 - `--pane <id>` targets another session when the user has asked you to move it. Without it, the CLI uses `ATRIUM_PANE_ID`.
 
-Claude and Codex chat sessions can move between checkouts of the same repository on the same machine. Pause active Codex goals, stop Claude goals or scheduled loops, and finish or stop the session's background agents and commands first. Standalone workspace commands keep running in their original project.
+Chat sessions from every tool can move between checkouts of the same repository on the same machine. Where supported, atrium resumes or forks the native conversation. Tools that cannot change directories on resume start a fresh engine session in the same pane and receive instructions to read the preserved conversation before continuing. No additional agent or terminal pane is created.
+
+Pause or stop active goals and scheduled loops, and finish or stop the session's background agents and commands first. Standalone workspace commands keep running in their original project. Each move has a status card at its place in the conversation. If you are viewing the moving pane, focus follows it and returns to the source if the move fails.
 
 After moving, refresh applicable project instructions and check absolute paths from earlier messages before editing. The working directory may retain its relative subdirectory when that directory exists in the destination. A worktree setup failure leaves the original conversation available and reports the prepared path for recovery.

@@ -226,7 +226,7 @@ atrium also injects the live defined-and-running list into your session automati
 
 ## Worktrees
 
-To pick up **this conversation** in a worktree, use `agent move --new-worktree <branch>` (Claude/Codex chat). Finish your turn after it schedules the move; atrium resumes the same conversation there. `agent move --help` explains existing destinations, selected changes, status, and cancellation. See [Moving a session](references/session-worktree-move.md) for the full flow.
+To pick up **this conversation** in a worktree, use `agent move --new-worktree <branch>` (any chat tool). Finish your turn after it schedules the move; atrium continues the same conversation there. `agent move --help` explains existing destinations, selected changes, status, and cancellation. See [Moving a session](references/session-worktree-move.md) for the full flow.
 
 Need a git worktree? Use `atrium worktree create --branch <name>` — **never** raw `git worktree add`. The CLI mirrors the New Worktree modal: it runs `git worktree add`, copies `.worktreeinclude` files, runs the parent's post-create commands, and binds a **child workspace** to the new path so it appears in atrium with its own panes and commands. A bare `git worktree add` leaves an orphan atrium can't see (recoverable later with `worktree adopt`, but create it right the first time).
 
