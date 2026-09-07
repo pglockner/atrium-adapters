@@ -7,12 +7,12 @@ Use this when a conversation started in the main checkout and the user asks to e
 "$ATRIUM_CLI_PATH" agent move --new-worktree feature/my-work
 ```
 
-The command schedules preparation and returns immediately. **Finish your current turn without starting more repository work.** atrium waits for the turn to finish, moves the conversation, refreshes its working directory and context, then sends a continuation prompt. Do not poll waiting for completion inside that turn: the move is waiting for you to finish.
+The command schedules preparation and returns immediately. **Finish your current turn without starting more repository work.** If the agent was active when the move was requested, atrium waits for the turn to finish, moves the conversation, updates its working directory, then sends a continuation nudge. An idle conversation stays idle and receives only the move notice. Do not poll waiting for completion inside an active turn: the move is waiting for you to finish.
 
 - `--worktree <id>` selects an existing worktree project from `worktree list`. Unbound worktrees must be adopted first.
 - `--base <ref>` chooses the starting commit for a new branch; the default is the source checkout's current `HEAD`.
-- Repeat `--include <repository-relative-file>` to copy selected uncommitted files. Files in the source checkout remain intact. Destination conflicts refuse the move; submodule changes must be committed or transferred separately.
-- `--no-continue` moves the session and waits for the next user message.
+- No uncommitted changes are copied by default. Repeat `--include <repository-relative-file>` to opt in for selected files. Files in the source checkout remain intact. Destination conflicts refuse the move; submodule changes must be committed or transferred separately.
+- `--no-continue` leaves the conversation idle after moving, even if the agent was active.
 - `--status` reads the last move's actual result. `--cancel` cancels before the conversation starts switching. A prepared worktree stays available.
 - `--pane <id>` targets another session when the user has asked you to move it. Without it, the CLI uses `ATRIUM_PANE_ID`.
 
@@ -20,4 +20,4 @@ Chat sessions from every tool can move between checkouts of the same repository 
 
 Pause or stop active goals and scheduled loops, and finish or stop the session's background agents and commands first. Standalone workspace commands keep running in their original project. Each move has a status card at its place in the conversation. If you are viewing the moving pane, focus follows it and returns to the source if the move fails.
 
-After moving, refresh applicable project instructions and check absolute paths from earlier messages before editing. The working directory may retain its relative subdirectory when that directory exists in the destination. A worktree setup failure leaves the original conversation available and reports the prepared path for recovery.
+After moving, use the destination as the current directory. Earlier absolute paths may point to the source checkout. Existing context remains useful; follow any instructions specific to the destination rather than rereading unchanged instructions by default. The working directory may retain its relative subdirectory when that directory exists in the destination. A worktree setup failure leaves the original conversation available and reports the prepared path for recovery.
