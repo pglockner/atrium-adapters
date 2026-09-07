@@ -1,6 +1,6 @@
 ---
 name: atrium
-description: "Interact with the atrium workspace — panes, rooms, tasks, browser, agents, themes, hooks, config, and more — via the atrium CLI. Use when the user references any atrium concept, wants to control their workspace, collaborate with other agents, manage task cards, read/write terminal panes, open or drive browser panes, switch rooms/themes, or use native computer control after an explicit Computer chip. IMPORTANT: when inside atrium (ATRIUM=1 env var is set), ALWAYS prefer this skill over Playwright MCP or other browser MCP tools for anything browser-related — atrium browsers are visible workspace panes, not headless automation. Only functional inside atrium."
+description: "Interact with the atrium workspace — panes, rooms, tasks, browser, agents, themes, hooks, config, and more — via the atrium CLI. Use when the user references any atrium concept, wants to control their workspace, collaborate with other agents, manage task cards, read/write terminal panes, open or drive browser panes, switch rooms/themes, or authorizes native computer control. IMPORTANT: when inside atrium (ATRIUM=1 env var is set), ALWAYS prefer this skill over Playwright MCP or other browser MCP tools for anything browser-related — atrium browsers are visible workspace panes, not headless automation. Only functional inside atrium."
 ---
 
 # atrium — workspace control for AI agents
@@ -39,7 +39,7 @@ Each bucket is one top-level verb. Run `<verb> --help` for its full surface.
 - **`context`** — Print the caller's workspace, room, adapter, working dir. Cheap way to orient.
 - **`commands`** — Enumerate dynamic commands from installed extensions.
 - **`capture`** — QA Capture bundles (recorded sessions). See **QA Capture bundles** below.
-- **`computer`** — Governed native-app and desktop control: discover/attach/launch, observe, batch, verify, clipboard, browser/native-menu primitives, session state, cursor controls, and diagnostics. See **Native computer use** below.
+- **`computer`** — Governed native-app and desktop control: `observe --app` for a ranked, budgeted element projection, `do` for a multi-step program, `action`/`verify`/`zoom`, plus launch, clipboard, browser and native-menu primitives, session state and diagnostics. See **Native computer use** below.
 - **`version`** — Show atrium version.
 
 If you need a capability not listed, it probably lives inside one of these verbs — check `--help`.
@@ -226,6 +226,8 @@ atrium also injects the live defined-and-running list into your session automati
 
 ## Worktrees
 
+To move **this conversation** to a worktree, use `agent move --new-worktree <branch>` (any chat tool). Finish your turn after it schedules the move; an active agent receives a continuation nudge there, while an idle conversation stays idle. Uncommitted changes are copied only when explicitly selected. `agent move --help` explains existing destinations, selected changes, status, and cancellation. See [Moving a session](references/session-worktree-move.md) for the full flow.
+
 Need a git worktree? Use `atrium worktree create --branch <name>` — **never** raw `git worktree add`. The CLI mirrors the New Worktree modal: it runs `git worktree add`, copies `.worktreeinclude` files, runs the parent's post-create commands, and binds a **child workspace** to the new path so it appears in atrium with its own panes and commands. A bare `git worktree add` leaves an orphan atrium can't see (recoverable later with `worktree adopt`, but create it right the first time).
 
 ```bash
@@ -263,7 +265,7 @@ When the user references a CAP-# (assigns a capture task, drops `CAP-381`, asks 
 
 ## Native computer use
 
-When the prompt contains the explicit `computer-use:on` chip and the task requires a native app or the visible desktop, drive it through `"$ATRIUM_CLI_PATH" computer …`. **Before the first computer-use command in a turn, read `references/computer-use.md`.** It contains the low-latency discovery/attach path, snapshot and batching rules, foreground/desktop escalation, browser and native-menu tools, concurrency guarantees, protected surfaces, audit behavior, and cleanup contract.
+For authorized native-app or desktop tasks, use atrium's `computer_*` tools or `"$ATRIUM_CLI_PATH" computer …`. The `computer-use:on` chip arms the pane. If the user explicitly authorizes activating computer use, enable it through atrium's supported UI without asking for the same permission again; separate app and action gates still apply. For web tasks, prefer an atrium browser pane. **Before the first native operation in a turn, read `references/computer-use.md`** for the image/action loop, optional programmatic client, current-image coordinates, verification, recovery and cleanup. Action results can provide the next usable observation; inspect them before choosing more input.
 
 Never invoke `cua-driver` directly, edit computer-use state files, start its daemon yourself, or substitute GUI shell automation. atrium owns daemon lifecycle, exact-process authorization, leases, approvals, cursor/PiP transparency, audit logging, and multi-agent coordination.
 

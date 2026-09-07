@@ -58,69 +58,30 @@ ensure_hooks_file() {
 # the atrium emit (so we can see whether the CLI reached atrium).
 LOG='log() { [ "${ATRIUM_HOOK_DEBUG:-1}" = "0" ] && return; printf "[%s] [pane=%s] %s\n" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "${ATRIUM_PANE_ID:-?}" "$*" >> /tmp/atrium-agy-hooks.log 2>/dev/null || true; }'
 
-# PreToolUse: pipe agy stdin through normalize-hook-payload.sh (which
-# adds session_id + tool_name + tool_input + _atrium envelope), forward
-# to atrium, output {"decision":"allow"} so agy doesn't block the call.
-build_pre_tool_use_command() {
-  printf '%s; %s; payload=$(cat); log "PreToolUse stdin=$(printf %%s \"$payload\" | head -c 400)"; printf "%%s" "$payload" | "${ATRIUM_DATA_DIR:-%s}/adapters/antigravity/normalize-hook-payload.sh" pre-tool-use | "${ATRIUM_CLI_PATH:-%s}" hook emit pre-tool-use --adapter antigravity --pane-id "${ATRIUM_PANE_ID:-}" --json >/dev/null 2>>/tmp/atrium-agy-hooks.log; log "PreToolUse emit rc=$?"; printf "{\\"decision\\":\\"allow\\"}\\n"; exit 0' \
-    "$ATRIUM_HOOK_MARKER_PREFIX" "$LOG" "$ATRIUM_DATA_DIR_FALLBACK" "$ATRIUM_CLI_FALLBACK"
-}
-
-build_post_tool_use_command() {
-  printf '%s; %s; payload=$(cat); log "PostToolUse stdin=$(printf %%s \"$payload\" | head -c 400)"; printf "%%s" "$payload" | "${ATRIUM_DATA_DIR:-%s}/adapters/antigravity/normalize-hook-payload.sh" post-tool-use | "${ATRIUM_CLI_PATH:-%s}" hook emit post-tool-use --adapter antigravity --pane-id "${ATRIUM_PANE_ID:-}" --json >/dev/null 2>>/tmp/atrium-agy-hooks.log; log "PostToolUse emit rc=$?"; printf "{}\\n"; exit 0' \
-    "$ATRIUM_HOOK_MARKER_PREFIX" "$LOG" "$ATRIUM_DATA_DIR_FALLBACK" "$ATRIUM_CLI_FALLBACK"
-}
-
-# PreInvocation: emit both session-start AND user-prompt-submit on every
-# fire. We discovered empirically that agy's payload either omits
-# `invocationNum` or names it differently — jq extracted 0 every time —
-# so the "first-invocation-only" gate never triggered. Atrium handles
-# duplicate session-starts idempotently (claude-code's hooks also fire
-# session-start on every "startup|resume" SessionStart event, so this is
-# the established pattern).
+# Every hook command is `<abs path to agy-hook-entry.sh> <event>`.
 #
-# Stdout: piped to inject-context.sh, which (on invocationNum==0) emits an
-# agy `injectSteps` envelope carrying the atrium SessionStart manifest,
-# pipeline context, and resolved sigils — agy's confirmed same-turn
-# context-injection primitive. Continuations / any failure emit `{}`.
-build_pre_invocation_command() {
-  # PreInvocation fires for EVERY model call. In an agentic tool loop a
-  # single user turn produces multiple PreInvocations: invocationNum=0
-  # for the user-initiated call, then invocationNum=1, 2, ... for each
-  # continuation triggered by tool results. atrium's reducer treats
-  # user-prompt-submit as "new turn begins" and clears recentToolCalls,
-  # so emitting it on every PreInvocation wipes tool history mid-turn.
-  # Gate user-prompt-submit on invocationNum=0; always emit session-start
-  # (atrium handles duplicates idempotently — matches claude-code's
-  # startup|resume SessionStart pattern).
-  printf '%s; %s; payload=$(cat); inv=$(printf "%%s" "$payload" | jq -r ".invocationNum // 0" 2>/dev/null || echo 0); log "PreInvocation inv=$inv stdin=$(printf %%s \"$payload\" | head -c 400)"; printf "%%s" "$payload" | "${ATRIUM_DATA_DIR:-%s}/adapters/antigravity/normalize-hook-payload.sh" session-start | "${ATRIUM_CLI_PATH:-%s}" hook emit session-start --adapter antigravity --pane-id "${ATRIUM_PANE_ID:-}" --json >/dev/null 2>>/tmp/atrium-agy-hooks.log; log "session-start emit rc=$?"; if [ "$inv" = "0" ]; then printf "%%s" "$payload" | "${ATRIUM_DATA_DIR:-%s}/adapters/antigravity/normalize-hook-payload.sh" user-prompt-submit | "${ATRIUM_CLI_PATH:-%s}" hook emit user-prompt-submit --adapter antigravity --pane-id "${ATRIUM_PANE_ID:-}" --json >/dev/null 2>>/tmp/atrium-agy-hooks.log; log "user-prompt-submit emit rc=$?"; else log "user-prompt-submit suppressed (continuation invocation)"; fi; printf "%%s" "$payload" | ATRIUM_CLI_PATH="${ATRIUM_CLI_PATH:-%s}" ATRIUM_DATA_DIR="${ATRIUM_DATA_DIR:-%s}" "${ATRIUM_DATA_DIR:-%s}/adapters/antigravity/inject-context.sh" 2>>/tmp/atrium-agy-hooks.log; log "inject rc=$?"; exit 0' \
-    "$ATRIUM_HOOK_MARKER_PREFIX" "$LOG" "$ATRIUM_DATA_DIR_FALLBACK" "$ATRIUM_CLI_FALLBACK" "$ATRIUM_DATA_DIR_FALLBACK" "$ATRIUM_CLI_FALLBACK" "$ATRIUM_CLI_FALLBACK" "$ATRIUM_DATA_DIR_FALLBACK" "$ATRIUM_DATA_DIR_FALLBACK"
-}
+# It CANNOT be an inline shell one-liner: the agy CLI (Go) runs hook
+# commands through a shell, but the Antigravity ACP server (Python)
+# splits on whitespace and execs argv directly. An inline command dies
+# there with "External hook 'atrium' failed to execute.", and since
+# PreToolUse treats missing stdout as DENY, that blocks every tool call
+# in an ACP chat session. A bare path + arg runs correctly under both.
+#
+# The path is absolute and resolved at install time because the exec'd
+# command string gets no variable expansion. agy-hook-entry.sh re-derives
+# ATRIUM_DATA_DIR / ATRIUM_CLI_PATH itself when the env is sanitized.
+HOOK_ENTRY="${ATRIUM_DATA_DIR_FALLBACK}/adapters/antigravity/agy-hook-entry.sh"
 
-# PostInvocation fires per model-invocation, not per-turn. With agentic
-# tool loops, a single user turn produces multiple PostInvocations (one
-# per model call). Wiring it to atrium's `stop` made the activity card
-# bounce between active and waiting several times per turn AND cleared
-# tool-call details each time. We DO NOT install a PostInvocation hook;
-# Stop (gated on fullyIdle) is the per-turn signal.
-
-# Stop fires when an execution terminates. agy's stdin includes
-# `fullyIdle: true` + `terminationReason: "NO_TOOL_CALL"` ONLY when the
-# turn is genuinely complete (model returned a final answer with no more
-# tool calls coming). Without fullyIdle, the same Stop event would fire
-# after every tool-execution sub-loop within a turn, causing the same
-# bouncing as a naive PostInvocation → stop mapping would.
-build_stop_command() {
-  printf '%s; %s; payload=$(cat); idle=$(printf "%%s" "$payload" | jq -r ".fullyIdle // false" 2>/dev/null || echo false); log "Stop fullyIdle=$idle stdin=$(printf %%s \"$payload\" | head -c 400)"; if [ "$idle" = "true" ]; then printf "%%s" "$payload" | "${ATRIUM_DATA_DIR:-%s}/adapters/antigravity/normalize-hook-payload.sh" stop | "${ATRIUM_CLI_PATH:-%s}" hook emit stop --adapter antigravity --pane-id "${ATRIUM_PANE_ID:-}" --json >/dev/null 2>>/tmp/atrium-agy-hooks.log; log "stop emit rc=$?"; fi; printf "{}\\n"; exit 0' \
-    "$ATRIUM_HOOK_MARKER_PREFIX" "$LOG" "$ATRIUM_DATA_DIR_FALLBACK" "$ATRIUM_CLI_FALLBACK"
+build_hook_command() {
+  printf '%s %s' "$HOOK_ENTRY" "$1"
 }
 
 build_atrium_hook_block() {
   local pre_tool post_tool pre_invocation stop
-  pre_tool="$(build_pre_tool_use_command)"
-  post_tool="$(build_post_tool_use_command)"
-  pre_invocation="$(build_pre_invocation_command)"
-  stop="$(build_stop_command)"
+  pre_tool="$(build_hook_command pre-tool-use)"
+  post_tool="$(build_hook_command post-tool-use)"
+  pre_invocation="$(build_hook_command session-start)"
+  stop="$(build_hook_command stop)"
 
   # NOTE the asymmetric shape: PreToolUse and PostToolUse use the
   # {matcher, hooks: [...]} wrapper because they support tool-name

@@ -208,6 +208,28 @@
           "description": "Optional arguments appended when launching the chat transport.",
           "items": { "type": "string" }
         },
+        "managedRuntime": {
+          "type": "string",
+          "description": "Optional. Names a runtime atrium downloads and owns, for transports whose server is a separate executable from the adapter's `binary` (e.g. antigravity's ACP server is not `agy`). Resolution order is user override path, then managed install, then `binaryDiscovery`.",
+          "minLength": 1
+        },
+        "binaryDiscovery": {
+          "type": "object",
+          "description": "Optional. Locates a transport server that is a different executable from the adapter's top-level `binary`. Same semantics as the top-level `binaryDiscovery`. Omitted transports launch the adapter's own binary.",
+          "properties": {
+            "commands": {
+              "type": "array",
+              "description": "Candidate binary names to search on PATH, in priority order.",
+              "items": { "type": "string", "minLength": 1 }
+            },
+            "wellKnownPaths": {
+              "type": "array",
+              "description": "Absolute or ~-prefixed fallback paths probed when no command resolves on PATH.",
+              "items": { "type": "string", "minLength": 1 }
+            }
+          },
+          "additionalProperties": false
+        },
         "capabilities": {
           "type": "object",
           "required": [
@@ -232,7 +254,10 @@
             "commandDiscovery": { "type": "boolean" },
             "planMode": { "type": "boolean" },
             "contextUsage": { "type": "boolean" },
-            "imageInput": { "type": "boolean" },
+            "imageInput": {
+              "type": "boolean",
+              "description": "PROMPT channel: the transport can carry an image the user attached to a message. Says nothing about whether the model can see an image a tool returns — that is 'toolImageRead'."
+            },
             "checkpointing": { "type": "boolean" },
             "subagentEvents": { "type": "boolean" },
             "steering": { "type": "boolean" },
@@ -240,6 +265,10 @@
             "conversationRewind": {
               "type": "boolean",
               "description": "Optional. Rewinding the CONVERSATION (rewind mode 'conversation'/'both') as distinct from restoring files: claude-sdk forkSession, muse-msp session/fork. Absent means the transport rewinds files only, or cannot rewind at all."
+            },
+            "toolImageRead": {
+              "type": "boolean",
+              "description": "Optional. TOOL channel: the agent has a file-reading tool that returns an image the model can actually look at (claude-sdk/claude-code Read, codex view_image, grok read_file, opencode read). Orthogonal to 'imageInput' — grok and opencode are imageInput:false yet read images this way, which is what makes a screenshot path from `atrium computer observe` usable. Absent means unprobed, not false."
             }
           },
           "additionalProperties": false

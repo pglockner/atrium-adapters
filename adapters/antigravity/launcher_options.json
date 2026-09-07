@@ -2,7 +2,7 @@
   "options": [
     {
       "key": "dangerouslySkipPermissions",
-      "label": "👮‍♂️",
+      "label": "\ud83d\udc6e\u200d\u2642\ufe0f",
       "description": "--dangerously-skip-permissions",
       "type": "toggle",
       "default": false
@@ -17,19 +17,24 @@
     {
       "key": "model",
       "label": "model",
-      "description": "Model id (effort folds into model name)",
+      "description": "Model id (effort folds into the model name; agy rejects unknown ids outright)",
       "type": "text",
       "default": "",
       "choices": [
-        "gemini-3.5-flash",
-        "gemini-3.1-pro",
-        "gemini-3-pro",
-        "gemini-3-flash",
-        "gemini-2.5-pro",
-        "gemini-2.5-flash",
+        "gemini-3.8-flash-high",
+        "gemini-3.8-flash-medium",
+        "gemini-3.8-flash-low",
+        "gemini-3.7-flash-high",
+        "gemini-3.7-flash-medium",
+        "gemini-3.7-flash-low",
+        "gemini-3.6-flash-high",
+        "gemini-3.6-flash-medium",
+        "gemini-3.6-flash-low",
+        "gemini-3.1-pro-high",
+        "gemini-3.1-pro-low",
         "claude-sonnet-4-6",
-        "claude-opus-4-6",
-        "gpt-oss-120b"
+        "claude-opus-4-6-thinking",
+        "gpt-oss-120b-medium"
       ]
     },
     {
@@ -41,9 +46,21 @@
     }
   ],
   "suggestedFlags": [
-    { "flag": "--sandbox", "description": "Terminal/sandbox restrictions" },
-    { "flag": "--include-directories", "description": "Additional workspace directories" },
-    { "flag": "--output-format", "description": "CLI output format" },
-    { "flag": "--debug", "description": "Debug mode" }
+    {
+      "flag": "--sandbox",
+      "description": "Terminal/sandbox restrictions"
+    },
+    {
+      "flag": "--include-directories",
+      "description": "Additional workspace directories"
+    },
+    {
+      "flag": "--output-format",
+      "description": "CLI output format"
+    },
+    {
+      "flag": "--debug",
+      "description": "Debug mode"
+    }
   ]
 }

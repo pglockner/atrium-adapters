@@ -1,10 +1,12 @@
 {
   "version": 1,
   "references": [
+    "session-worktree-move.md",
     "notes-interactive-ui.md",
     "chat-canvas-fence.md",
     "capture.md",
     "computer-use.md",
+    "computer-client.md",
     "teaching-mode.md",
     "authoring-skills.md"
   ]
