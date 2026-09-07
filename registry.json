@@ -79,7 +79,7 @@
           "postInstallAuth": true
         }
       },
-      "contentSha256": "551ba04390ab7061ccae549e86b66b255d09a2795c5561be25e79abb94d83ccb",
+      "contentSha256": "4a22f9c282e6ae0616139c9ce212a8188958e725dfbb46dab223bf8ece2d991e",
       "maxAppVersion": null
     },
     {
@@ -107,7 +107,7 @@
           "postInstallAuth": true
         }
       },
-      "contentSha256": "df1438e637cd7167513c5c6de412de5bd3ad8fb6981d203741f873fa3ed4486e",
+      "contentSha256": "8412196207944ca6453dae78eb85e4d40663b458a762c8a6080c4267781307c2",
       "maxAppVersion": null
     },
     {
@@ -141,7 +141,7 @@
         }
       },
       "maxAppVersion": null,
-      "contentSha256": "e0bf34923cc6c037001002830610ac24a60b4ac5ca8f6dce0af12082c26c16df"
+      "contentSha256": "0332ef3cc129d606a5433a4222ed299e31944d655dc626d80883009d8ae91e45"
     },
     {
       "name": "kimi",
@@ -204,7 +204,7 @@
           "postInstallAuth": true
         }
       },
-      "contentSha256": "f8f5498fdd73373e97eade54da21f8ca1335b00330f2bea6bd94b95f2c076e0c",
+      "contentSha256": "49c46085288f7428a1fd9c07387f6d0aaed6f88589f369436d0467728238ca7a",
       "maxAppVersion": null
     },
     {
@@ -362,7 +362,7 @@
   ],
   "source": {
     "repository": "jonnyasmar/atrium-adapters",
-    "commit": "0f933d5bbeb555fe533f9afbd31abf9fd8a30eff",
+    "commit": "854bce700901fd93dc3a8d334fe29b78ac3f918f",
     "sharedSha256": "71b4cc5d0077cde8a923e91cd60967923e43e9a408ede0e184cf3f5b1ad94492",
     "schemaSha256": "bff9986c3ef71c4ce11028f7be77ca3faae8d994c991158e8837ed057bdbfbaf",
     "methodsSchemaSha256": "dc985f52de0dfd1ef79a6acc878f5f508b4fc19342b36d74bdea5f3c61f71b0a"
