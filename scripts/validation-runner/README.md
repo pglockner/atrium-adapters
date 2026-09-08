@@ -1,0 +1,9 @@
+# Self-hosted adapter validation
+
+The `atrium-adapters-validate` runner uses its own unprivileged Docker container and home volume on the desktop. It has two CPUs, 1 GiB RAM, a further 1 GiB swap allowance and a 512-process limit. It shares no app runner home, credentials, host Docker socket or application mounts. Build its image from the private app repository's pinned Linux runner image and this directory's Dockerfile; validation dependencies are installed at image build time.
+
+Validation runs on repository branch pushes. The required `validate` check therefore proves the proposed commit before it reaches `main`, which serves the public registry. There is no duplicate pull-request run. Review external contributions before importing them onto a repository branch; do not execute fork code on this runner. The repository's fork workflow approval policy must remain `all_external_contributors`, including contributors whose earlier changes were merged. GitHub documents the [fork approval boundary](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/approve-runs-from-forks).
+
+Register the container with `https://github.com/jonnyasmar/atrium-adapters` and label `atrium-adapters-validate`. Pass a freshly generated registration token over standard input to `config.sh`, then discard it. Use a dedicated home volume, `--restart unless-stopped`, `--init`, `--cpus 2`, `--memory 1g`, `--memory-swap 2g` and `--pids-limit 512`. Never reuse the private app runner's registration or volume. The current image is `atrium-adapters-runner:ubuntu24.04-20260908` and the container/volume are `atrium-adapters-desktop` / `atrium-adapters-desktop-home`.
+
+`tests/validation_workflow_test.py` enforces self-hosted routing and branch-only execution. `validate` has read-only repository permissions and a 20-minute timeout. Required checks and branch protection remain enabled. Inspect runner availability before pushing; there is no hosted fallback.
