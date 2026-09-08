@@ -3,29 +3,23 @@ set -euo pipefail
 
 session_id="${1:?session id required}"
 # See build_launch_command.sh: atrium passes these keys top-level, not under
-# `extra`. Accept both shapes so resume keeps the profile's model/provider.
+# `extra`.
 flags="${2:-}"
 [ -z "$flags" ] && flags='{}'
 
-provider=$(echo "$flags" | jq -r '[.provider, .extra.provider] | map(select(. != null and . != "")) | first // empty')
-# "default" is the sentinel for "let goose resolve its own model" — atrium's
-# static launcher_options cannot enumerate per-provider models, so the select
-# offers only that one entry and users switch with /model in-session. It must
-# never reach the CLI: `goose --model default` is a hard 400 from the provider.
-model=$(echo "$flags" | jq -r '[.model, .extra.model] | map(select(. != null and . != "" and . != "default")) | first // empty')
-effort=$(echo "$flags" | jq -r '[.effort, .extra.effort] | map(select(. != null and . != "")) | first // empty')
-extra_args=$(echo "$flags" | jq -r '[.extraArgs, .extra.extraArgs] | map(select(. != null and . != "")) | first // empty')
+effort=$(echo "$flags" | jq -r '.effort // "" | select(. != "")')
+extra_args=$(echo "$flags" | jq -r '.extraArgs // "" | select(. != "")')
 
 cmd=(goose session --resume --session-id "$session_id")
 
-# Resume must carry the provider/model the launch profile applied. Goose
-# otherwise falls back to the default configured in config.yaml, silently
-# switching models out from under a resumed session.
-[ -n "$provider" ] && cmd+=(--provider "$provider")
-[ -n "$model" ] && cmd+=(--model "$model")
+# Provider and model are deliberately NOT re-applied on resume. Goose restores
+# the session's persisted provider_name and model_config (sessions.db), and only
+# falls back to global config if those are absent. Re-appending the launch
+# profile's original --provider/--model would overwrite an in-session /model
+# change with stale launch-time values. Let Goose restore its own.
 
-# Carry the effort so the resumed session keeps the same thinking_effort.
-# Goose has no --effort flag; set GOOSE_THINKING_EFFORT instead.
+# Effort has no persisted per-session field in Goose, so carry it forward from
+# the launch profile via GOOSE_THINKING_EFFORT (there is no --effort flag).
 if [ -n "$effort" ]; then
   cmd=(env GOOSE_THINKING_EFFORT="$effort" "${cmd[@]}")
 fi

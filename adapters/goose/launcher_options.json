@@ -3,15 +3,9 @@
     {
       "key": "model",
       "label": "model",
-      "description": "Goose resolves the model from its own config. atrium cannot enumerate per-provider models (launcher_options is static JSON and cannot cascade off the provider field), so switch models in-session with /model.",
-      "type": "select",
-      "default": "default",
-      "choices": [
-        {
-          "value": "default",
-          "label": "Session default (use /model)"
-        }
-      ]
+      "description": "Optional. An exact Goose model id for this session (e.g. anthropic/claude-sonnet-4, qwen/qwen3-coder). Leave blank to let Goose resolve its own configured model; atrium cannot enumerate per-provider models, so there is no menu — switch models in-session with /model.",
+      "type": "text",
+      "default": ""
     },
     {
       "key": "provider",
@@ -23,7 +17,7 @@
     {
       "key": "effort",
       "label": "effort",
-      "description": "Goose's own default is off, and the supported levels depend on the active model. Leave blank to inherit; change in-session with /model or set GOOSE_THINKING_EFFORT.",
+      "description": "Optional reasoning effort. Leave blank to inherit (Goose applies the configured / provider / model behavior). Supported levels depend on the active model; an unsupported level makes Goose refuse to start the session. Also changeable in-session, or via GOOSE_THINKING_EFFORT.",
       "type": "select",
       "default": "",
       "choices": [

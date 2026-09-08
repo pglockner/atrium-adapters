@@ -1,22 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# atrium passes launcher_options keys at the TOP level of the flags bag
-# ({"model":"…","provider":"…"}), which is what every shipped adapter reads.
-# The SDK README also documents a nested `extra` object, so accept both and
-# prefer whichever is actually populated. Reading only `.extra` silently
-# dropped every launch-profile model/provider/effort selection.
+# atrium passes each launcher_options key at the TOP level of the flags bag
+# ({"model":"…","provider":"…","effort":"…","extraArgs":"…"}) — the same shape
+# every other adapter reads. (An older SDK README described a nested `extra`
+# object; that was AdapterFlags, which has been removed. Do not read `.extra`.)
 flags="${1:-}"
 [ -z "$flags" ] && flags='{}'
 
-provider=$(echo "$flags" | jq -r '[.provider, .extra.provider] | map(select(. != null and . != "")) | first // empty')
-# "default" is the sentinel for "let goose resolve its own model" — atrium's
-# static launcher_options cannot enumerate per-provider models, so the select
-# offers only that one entry and users switch with /model in-session. It must
-# never reach the CLI: `goose --model default` is a hard 400 from the provider.
-model=$(echo "$flags" | jq -r '[.model, .extra.model] | map(select(. != null and . != "" and . != "default")) | first // empty')
-effort=$(echo "$flags" | jq -r '[.effort, .extra.effort] | map(select(. != null and . != "")) | first // empty')
-extra_args=$(echo "$flags" | jq -r '[.extraArgs, .extra.extraArgs] | map(select(. != null and . != "")) | first // empty')
+provider=$(echo "$flags" | jq -r '.provider // "" | select(. != "")')
+model=$(echo "$flags" | jq -r '.model // "" | select(. != "")')
+effort=$(echo "$flags" | jq -r '.effort // "" | select(. != "")')
+extra_args=$(echo "$flags" | jq -r '.extraArgs // "" | select(. != "")')
 
 cmd=(goose session)
 

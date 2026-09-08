@@ -235,7 +235,7 @@ Builds the command array to start a new session.
 
 **Args:** `$1` = flags JSON | **Output:** `{"command": ["mytool", "--flag"]}` | **Exit:** 0 = success, 1 = cannot build
 
-Flags JSON keys: `dangerouslySkipPermissions` (boolean), `worktreePath` (string or null), `extra` (object -- adapter-specific flags from launcher_options).
+Flags JSON keys: `dangerouslySkipPermissions` (boolean), `worktreePath` (string or null), plus every `launcher_options` option `key` as a **top-level** field (e.g. `model`, `provider`, `effort`, `extraArgs`) — the script receives the frontend's raw top-level JSON, not a nested `extra` object.
 
 ---
 

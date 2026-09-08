@@ -3,10 +3,10 @@ set -euo pipefail
 
 # Regression check: goose launch must consume the flags bag atrium actually
 # sends. atrium passes launcher_options keys at the TOP level
-# ({"model":…,"provider":…,"extraArgs":…}); the SDK README additionally
-# documents a nested `extra` object. goose originally read only `.extra`, so
-# every launch profile's model/provider/effort was silently dropped and every
-# session started on goose's own configured default instead.
+# ({"model":…,"provider":…,"effort":…,"extraArgs":…}). goose originally read a
+# nested `.extra` object (AdapterFlags, since removed), so every launch
+# profile's model/provider/effort was silently dropped and every session
+# started on goose's own configured default instead.
 # Verified live: pane launched with a model-bearing profile produced a bare
 # `goose session` argv before the fix, and
 # `goose session --provider … --model …` after.
@@ -34,30 +34,23 @@ assert_launch "top-level flags (the shape atrium sends)" \
   '{"extraArgs":"","model":"qwen/qwen3-coder","provider":"openrouter"}' \
   '["goose","session","--provider","openrouter","--model","qwen/qwen3-coder"]'
 
-assert_launch "nested extra (the shape the README documents)" \
-  '{"extra":{"model":"m1","provider":"p1","effort":"high","extraArgs":"--debug"}}' \
-  '["env","GOOSE_THINKING_EFFORT=high","goose","session","--provider","p1","--model","m1","--debug"]'
+# A nested `.extra` object is NOT read — that shape is dead (AdapterFlags removed).
+assert_launch "nested .extra is ignored, not unwrapped" \
+  '{"extra":{"model":"m1","provider":"p1","effort":"high"}}' \
+  '["goose","session"]'
 
 # effort has no CLI flag; it must ride in as an env prefix, never as --effort.
 assert_launch "effort becomes a GOOSE_THINKING_EFFORT env prefix" \
   '{"effort":"max"}' \
   '["env","GOOSE_THINKING_EFFORT=max","goose","session"]'
 
+assert_launch "all flags together" \
+  '{"model":"anthropic/claude","provider":"anthropic","effort":"medium","extraArgs":"--max-turns 3"}' \
+  '["env","GOOSE_THINKING_EFFORT=medium","goose","session","--provider","anthropic","--model","anthropic/claude","--max-turns","3"]'
+
 # An unset select sends "" — that must not become an empty flag value.
 assert_launch "blank values are omitted, not passed as empty flags" \
   '{"model":"","provider":"","effort":"","extraArgs":""}' \
-  '["goose","session"]'
-
-# The model select ships a single "default" sentinel because atrium's static
-# launcher_options cannot enumerate goose's per-provider model list. It must be
-# swallowed, never forwarded: `goose --model default` is a hard 400 from the
-# provider ("default is not a valid model ID").
-assert_launch "model=default is swallowed, not passed to the CLI" \
-  '{"model":"default","provider":"openrouter"}' \
-  '["goose","session","--provider","openrouter"]'
-
-assert_launch "model=default with no provider yields a bare session" \
-  '{"model":"default"}' \
   '["goose","session"]'
 
 assert_launch "no flags at all" '{}' '["goose","session"]'
