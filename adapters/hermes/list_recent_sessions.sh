@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# list_recent_sessions.sh — List recent Hermes CLI sessions for a CWD.
+# list_recent_sessions.sh — List recent Hermes CLI and chat sessions for a CWD.
 # Reads ~/.hermes/state.db (SQLite) directly — a single indexed query, well
 # under the adapter <50ms budget.
 # Takes $1 = CWD
@@ -19,7 +19,7 @@ SQL="SELECT id,
             COALESCE(cwd, '')                    AS cwd,
             COALESCE(ended_at, started_at)       AS last_active
      FROM sessions
-     WHERE source = 'cli' AND archived = 0 AND cwd = '${ESC}'
+     WHERE source IN ('cli', 'acp') AND archived = 0 AND cwd = '${ESC}'
      ORDER BY last_active DESC
      LIMIT 10"
 

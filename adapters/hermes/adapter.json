@@ -5,7 +5,7 @@
   "description": "Nous Research's tool-calling AI agent",
   "accent": "#e0a32e",
   "binary": "hermes",
-  "version": "0.2.9",
+  "version": "0.3.0",
   "updateCommand": [
     "hermes",
     "update"
@@ -95,5 +95,14 @@
       "steering": false,
       "backgroundTasks": false
     }
+  },
+  "sessionExtractor": {
+    "script": "extract_session.sh",
+    "schemaVersion": 1,
+    "supportsDepths": [
+      "quick",
+      "standard",
+      "deep"
+    ]
   }
 }
