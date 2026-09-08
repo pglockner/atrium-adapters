@@ -5,6 +5,8 @@ on:
     # main serves registry.json directly, so validate the exact SHA on a branch
     # before branch protection permits that SHA to land on main.
     branches: ["**"]
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: read
@@ -14,7 +16,8 @@ env:
 
 jobs:
   validate:
-    runs-on: [self-hosted, Linux, X64, atrium-adapters-validate]
+    # Standard hosted compute is free for this public repository.
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - name: Checkout repository
@@ -23,6 +26,18 @@ jobs:
           # Release metadata intentionally pins the immutable content commit,
           # which can predate the metadata-only commit under validation.
           fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "25.9.0"
+
+      - name: Install validation dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq sqlite3 liburi-perl python3-venv
+          python3 -m venv "$RUNNER_TEMP/validation-python"
+          "$RUNNER_TEMP/validation-python/bin/pip" install --quiet jsonschema PyYAML
+          echo "$RUNNER_TEMP/validation-python/bin" >> "$GITHUB_PATH"
 
       - name: Verify validation tools and runner policy
         run: |
