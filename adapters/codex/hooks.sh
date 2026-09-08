@@ -167,18 +167,6 @@ build_all_hooks() {
     '[{matcher: ".*", hooks: [{type: "command", command: $cmd, timeout: 5}]}]')"
   hooks="$(jq --argjson e "$inject_post" '.PostToolUse += $e' <<< "$hooks")"
 
-  # Hard boundary for atrium-hosted agents. This entry deliberately does not
-  # carry CHAT_SDK_GUARD: user settings still execute in chat panes, and that
-  # is where a direct shell call must be stopped before the driver sees it.
-  # The hidden CLI verb is local-only and emits Codex's native block envelope;
-  # an older/missing CLI degrades to `{}` during a staggered adapter update.
-  local computer_guard_cmd computer_guard_entry
-  computer_guard_cmd="$(printf '%s; if [ -n "${ATRIUM:-}" ]; then "${ATRIUM_CLI_PATH:-atrium}" hook guard-computer-use 2>/dev/null || printf "{}\n"; else printf "{}\n"; fi' \
-    "$ATRIUM_HOOK_MARKER_PREFIX")"
-  computer_guard_entry="$(jq -n --arg cmd "$computer_guard_cmd" \
-    '[{matcher: ".*", hooks: [{type: "command", command: $cmd, timeout: 2}]}]')"
-  hooks="$(jq --argjson e "$computer_guard_entry" '.PreToolUse += $e' <<< "$hooks")"
-
   printf '%s' "$hooks"
 }
 
