@@ -168,6 +168,18 @@ build_all_hooks() {
     '[{matcher: ".*", hooks: [{type: "command", command: $cmd, timeout: 5}]}]')"
   hooks="$(jq --argjson e "$inject_post" '.PostToolUse += $e' <<< "$hooks")"
 
+  # Hard boundary for atrium-hosted agents. Keep this outside both the Cursor
+  # and chat guards: either can execute a shell tool under Claude's user hook
+  # settings, and direct driver use must stop before it bypasses atrium. The
+  # hidden CLI verb is local-only; `{}` preserves compatibility while an older
+  # CLI and newer adapter briefly overlap.
+  local computer_guard_cmd computer_guard_entry
+  computer_guard_cmd="$(printf '%s; if [ -n "${ATRIUM:-}" ]; then "${ATRIUM_CLI_PATH:-atrium}" hook guard-computer-use 2>/dev/null || printf "{}\n"; else printf "{}\n"; fi' \
+    "$ATRIUM_HOOK_MARKER_PREFIX")"
+  computer_guard_entry="$(jq -n --arg cmd "$computer_guard_cmd" \
+    '[{matcher: ".*", hooks: [{type: "command", command: $cmd, timeout: 2}]}]')"
+  hooks="$(jq --argjson e "$computer_guard_entry" '.PreToolUse += $e' <<< "$hooks")"
+
   printf '%s' "$hooks"
 }
 
