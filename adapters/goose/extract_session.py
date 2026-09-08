@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Goose session extractor — emits canonical JSONL events.
 
-Reads:
-  - ~/.local/share/goose/sessions/sessions.db (SQLite database)
-    - sessions table (metadata: id, name, created_at, updated_at)
-    - messages table (role, content_json, timestamp)
+Reads Goose's SQLite session store (see resolve_session_db.sh for the path):
+  - sessions table  (metadata: id, name, working_dir, created_at, updated_at)
+  - messages table  (role, content_json, timestamp, metadata_json)
+
+Goose 1.48+ nests tool call/result payloads under a `.value` envelope
+({"status": ..., "value": {...}}); 1.47 and earlier put the fields at the top
+level. Both shapes are handled.
 """
 from __future__ import annotations
 
@@ -13,6 +16,12 @@ import json
 import sqlite3
 import sys
 from datetime import datetime, timezone
+
+# Tool results are large and mostly shell/developer output. At deep depth we
+# emit a result only for those tools, and only when it can be attributed to a
+# request, with the text capped.
+RESULT_TOOL_ALLOW_PREFIXES = ("developer", "shell", "str_replace", "text_editor")
+RESULT_TEXT_CAP = 2000
 
 def emit(event: dict) -> None:
     sys.stdout.write(json.dumps(event, ensure_ascii=False))
@@ -50,6 +59,31 @@ def _normalize_ts(ts_str: str | None) -> str:
         return dt.replace(tzinfo=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     except Exception:
         return ts_str
+
+def _unwrap(node):
+    """Return the payload of a Goose tool envelope, tolerating both the
+    1.48+ {"status","value":{...}} shape and the older flat shape."""
+    if isinstance(node, dict) and "value" in node and isinstance(node["value"], dict):
+        return node["value"]
+    return node if isinstance(node, dict) else {}
+
+def _is_user_visible(metadata_json: str | None) -> bool:
+    """Goose tags each message with {userVisible, agentVisible, turnContext}.
+    Turn-context injections and non-user-visible rows are noise for a
+    transcript. Rows with no/blank metadata default to visible."""
+    if not metadata_json:
+        return True
+    try:
+        meta = json.loads(metadata_json)
+    except Exception:
+        return True
+    if not isinstance(meta, dict):
+        return True
+    if meta.get("turnContext") is True:
+        return False
+    if meta.get("userVisible") is False:
+        return False
+    return True
 
 def extract(db_path: str, session_id: str, cwd: str, depth: str) -> None:
     try:
@@ -97,7 +131,8 @@ def extract(db_path: str, session_id: str, cwd: str, depth: str) -> None:
     # 2. Fetch Messages
     try:
         cursor.execute(
-            "SELECT role, content_json, timestamp FROM messages WHERE session_id = ? ORDER BY id ASC",
+            "SELECT role, content_json, timestamp, metadata_json "
+            "FROM messages WHERE session_id = ? ORDER BY created_timestamp ASC, id ASC",
             (session_id,)
         )
         messages = cursor.fetchall()
@@ -105,9 +140,11 @@ def extract(db_path: str, session_id: str, cwd: str, depth: str) -> None:
         print(f"[goose] SQLite messages query failure: {exc}", file=sys.stderr)
         messages = []
 
+    visible = [m for m in messages if _is_user_visible(m["metadata_json"])]
+
     # If title still empty and messages exist, derive from first user msg
     if "title" not in session_start:
-        for m in messages:
+        for m in visible:
             if m["role"] == "user":
                 try:
                     content = json.loads(m["content_json"])
@@ -131,11 +168,14 @@ def extract(db_path: str, session_id: str, cwd: str, depth: str) -> None:
         conn.close()
         return
 
-    call_counter = 0
-    for m in messages:
+    # Correlate tool responses back to the request that produced them. Goose
+    # uses the same id on the toolRequest and its toolResponse.
+    tool_by_id: dict[str, str] = {}
+
+    for m in visible:
         ts = _normalize_ts(m["timestamp"])
         role = m["role"]
-        
+
         try:
             content = json.loads(m["content_json"])
         except Exception:
@@ -147,12 +187,11 @@ def extract(db_path: str, session_id: str, cwd: str, depth: str) -> None:
         for part in content:
             if not isinstance(part, dict):
                 continue
-            
+
             p_type = part.get("type")
 
             if p_type == "text":
                 text = part.get("text", "")
-                # Skip turn-context prose if present
                 if "<turn-context>" in text:
                     continue
                 if text.strip():
@@ -165,50 +204,59 @@ def extract(db_path: str, session_id: str, cwd: str, depth: str) -> None:
                     emitted += 1
 
             elif p_type == "toolRequest":
-                call_counter += 1
-                tool_call = part.get("toolCall") or {}
-                tool_name = tool_call.get("name") or "unknown"
-                args = tool_call.get("arguments") or {}
-                
+                call = _unwrap(part.get("toolCall") or {})
+                tool_name = call.get("name") or "unknown"
+                args = call.get("arguments")
                 if not isinstance(args, dict):
-                    args = {"value": args}
-                
-                call_id = part.get("id") or f"call_{call_counter}"
-                
+                    args = {} if args is None else {"value": args}
+
+                call_id = part.get("id") or ""
+                if call_id:
+                    tool_by_id[call_id] = tool_name
+
                 if depth == "standard":
-                    # Truncate large tool inputs
                     args = {k: (v[:500] + "..." if isinstance(v, str) and len(v) > 500 else v) for k, v in args.items()}
-                
-                emit({
+
+                event = {
                     "type": "tool_use",
                     "tool": tool_name,
                     "input": args,
                     "at": ts,
-                    "id": call_id
-                })
+                }
+                if call_id:
+                    event["id"] = call_id
+                emit(event)
                 emitted += 1
 
             elif p_type == "toolResponse" and depth == "deep":
-                tool_result = part.get("toolResult") or {}
-                is_error = tool_result.get("isError", False)
-                
-                # Fetch text content from tool response blocks
-                res_content = tool_result.get("content", [])
+                call_id = part.get("id") or ""
+                tool_name = tool_by_id.get(call_id)
+                # Only emit a result we can attribute to a request, for the
+                # shell/developer-class tools whose output is worth keeping.
+                if not call_id or not tool_name:
+                    continue
+                if not tool_name.startswith(RESULT_TOOL_ALLOW_PREFIXES):
+                    continue
+
+                result = _unwrap(part.get("toolResult") or {})
+                is_error = bool(result.get("isError", False))
+                res_content = result.get("content", [])
                 text_parts = []
                 if isinstance(res_content, list):
                     for sub in res_content:
                         if isinstance(sub, dict) and sub.get("type") == "text":
                             text_parts.append(sub.get("text", ""))
                 text = "".join(text_parts)
-                
-                # We limit results to deep commands like shell/developer
+                if len(text) > RESULT_TEXT_CAP:
+                    text = text[:RESULT_TEXT_CAP] + "..."
+
                 emit({
                     "type": "tool_result",
-                    "tool": "developer__shell",
-                    "tool_use_id": part.get("id") or "",
+                    "tool": tool_name,
+                    "tool_use_id": call_id,
                     "text": text,
                     "at": ts,
-                    "is_error": bool(is_error),
+                    "is_error": is_error,
                 })
                 emitted += 1
 
