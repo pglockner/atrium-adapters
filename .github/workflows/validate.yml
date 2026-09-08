@@ -5,12 +5,17 @@ on:
     # main serves registry.json directly, so validate the exact SHA on a branch
     # before branch protection permits that SHA to land on main.
     branches: ["**"]
-  pull_request:
-    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, atrium-adapters-validate]
+    timeout-minutes: 20
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -19,12 +24,17 @@ jobs:
           # which can predate the metadata-only commit under validation.
           fetch-depth: 0
 
-      - name: Install validation dependencies
-        run: sudo apt-get update && sudo apt-get install -y jq sqlite3 liburi-perl
+      - name: Verify validation tools and runner policy
+        run: |
+          node --version
+          jq --version
+          sqlite3 --version
+          perl -MURI::Escape -e 'exit 0'
+          python3 -c 'import jsonschema, yaml'
+          python3 tests/validation_workflow_test.py
 
       - name: Validate manifests against JSON schema
         run: |
-          python3 -m pip install --quiet jsonschema
           python3 check-schemas.py
 
       - name: Make validate-adapter.sh executable
@@ -53,8 +63,10 @@ jobs:
 
       - name: Validate grok launcher catalog
         run: |
-          python3 -m pip install --quiet jsonschema
           bash tests/grok-launcher-catalog.assert.sh
+
+      - name: Validate Hermes transcript recovery
+        run: python3 -m unittest discover -s adapters/hermes/tests -p '*_test.py'
 
       - name: Validate package-manager-aware update checks
         run: bash tests/homebrew-managed-updates.assert.sh
