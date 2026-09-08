@@ -4,55 +4,36 @@ set -euo pipefail
 # hooks.sh — Manage Goose hook installation for atrium.
 # Goose auto-discovers plugins at ~/.agents/plugins/<name>/hooks/hooks.json
 # (Open Plugins hooks spec: https://open-plugins.com/agent-builders/components/hooks).
+#
+# The plugin's hooks.json points every event at the adapter's committed
+# goose-hook.sh, which normalizes the payload and relays it to atrium. Only the
+# events Goose 1.49.0 actually dispatches to plugins are wired: SessionStart,
+# SessionEnd, UserPromptSubmit, Stop. (PreToolUse/PostToolUse/PostToolUseFailure
+# are enum variants that are not delivered to plugins in current Goose.)
+#
 # Subcommands: install, uninstall, status
 # Output: JSON to stdout, diagnostics to stderr
 
 SUBCOMMAND="${1:?Usage: hooks.sh <install|uninstall|status>}"
 
+ADAPTER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+HOOK_SCRIPT="${ADAPTER_DIR}/goose-hook.sh"
 PLUGIN_DIR="${HOME}/.agents/plugins/atrium-goose"
 HOOKS_JSON="${PLUGIN_DIR}/hooks/hooks.json"
-RELAY_SCRIPT="${PLUGIN_DIR}/relay.sh"
 
 do_install() {
   mkdir -p "${PLUGIN_DIR}/hooks"
+  chmod +x "$HOOK_SCRIPT" "${ADAPTER_DIR}/normalize-hook-payload.sh"
 
-  cat > "$RELAY_SCRIPT" <<'EOF'
-#!/usr/bin/env bash
-# Relays a Goose lifecycle event to atrium's local hook server.
-# Never fails the calling session: always exits 0.
-EVENT="${1:-}"
-PORT=$(cat "${HOME}/.atrium/hook-port" 2>/dev/null) || exit 0
-[ -n "$PORT" ] || exit 0
-curl -s -X POST "http://127.0.0.1:${PORT}/api/adapter/goose/${EVENT}" \
-  -H 'Content-Type: application/json' -d "$(cat)" >/dev/null 2>&1 || true
-exit 0
-EOF
-  chmod +x "$RELAY_SCRIPT"
-
-  cat > "$HOOKS_JSON" <<EOF
-{
-  "hooks": {
-    "SessionStart": [{
-      "hooks": [{ "type": "command", "command": "${RELAY_SCRIPT} session-start" }]
-    }],
-    "SessionEnd": [{
-      "hooks": [{ "type": "command", "command": "${RELAY_SCRIPT} session-end" }]
-    }],
-    "UserPromptSubmit": [{
-      "hooks": [{ "type": "command", "command": "${RELAY_SCRIPT} user-prompt-submit" }]
-    }],
-    "PreToolUse": [{
-      "hooks": [{ "type": "command", "command": "${RELAY_SCRIPT} pre-tool-use" }]
-    }],
-    "PostToolUse": [{
-      "hooks": [{ "type": "command", "command": "${RELAY_SCRIPT} post-tool-use" }]
-    }],
-    "PostToolUseFailure": [{
-      "hooks": [{ "type": "command", "command": "${RELAY_SCRIPT} post-tool-use-failure" }]
-    }]
-  }
-}
-EOF
+  jq -n --arg cmd "$HOOK_SCRIPT" '
+    def ev($name; $arg): { ($name): [ { hooks: [ { type: "command", command: ($cmd + " " + $arg) } ] } ] };
+    { hooks:
+        ( ev("SessionStart";     "session-start")
+        + ev("SessionEnd";       "session-end")
+        + ev("UserPromptSubmit"; "user-prompt-submit")
+        + ev("Stop";             "stop") )
+    }
+  ' > "$HOOKS_JSON"
 
   echo '{"subcommand": "install", "installed": true}'
 }

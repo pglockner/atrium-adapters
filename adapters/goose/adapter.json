@@ -71,9 +71,6 @@
     "session-start": "atrium://hooks/goose/session-start",
     "session-end": "atrium://hooks/goose/session-end",
     "user-prompt-submit": "atrium://hooks/goose/user-prompt-submit",
-    "pre-tool-use": "atrium://hooks/goose/pre-tool-use",
-    "post-tool-use": "atrium://hooks/goose/post-tool-use",
-    "post-tool-use-failure": "atrium://hooks/goose/post-tool-use-failure",
     "stop": "atrium://hooks/goose/stop"
   },
   "hookEnvelopes": {
