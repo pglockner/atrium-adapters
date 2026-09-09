@@ -384,15 +384,16 @@
           "postInstallAuth": true
         }
       },
-      "maxAppVersion": null
+      "maxAppVersion": null,
+      "contentSha256": "24e61fccaf814e8fb69e87d93123cd9005f8d2a180f300311d6fe51aa169110d"
     }
   ],
   "source": {
     "repository": "jonnyasmar/atrium-adapters",
-    "commit": "2a9c765033faeed10cbdd3f40376bfcf904c3ed2",
+    "commit": "215edd57f362e3452da0cbbcb5a8c03776aaf595",
     "sharedSha256": "71b4cc5d0077cde8a923e91cd60967923e43e9a408ede0e184cf3f5b1ad94492",
     "schemaSha256": "bff9986c3ef71c4ce11028f7be77ca3faae8d994c991158e8837ed057bdbfbaf",
-    "methodsSchemaSha256": "dc985f52de0dfd1ef79a6acc878f5f508b4fc19342b36d74bdea5f3c61f71b0a"
+    "methodsSchemaSha256": "a7c2939121db2e948a6b5f1f0d3ed0df58de8930108845a789e95b33944c6060"
   },
   "tombstones": []
 }
