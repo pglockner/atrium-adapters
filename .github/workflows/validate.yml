@@ -86,7 +86,7 @@ jobs:
       - name: Validate goose session-DB resolution
         run: bash tests/goose-session-db-resolution.assert.sh
 
-      - name: Validate goose extractor against a 1.49 fixture
+      - name: Validate goose extractor against a 1.50 fixture
         run: bash adapters/goose/tests/extractor/assert.sh
 
       - name: Validate Hermes transcript recovery
