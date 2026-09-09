@@ -6,10 +6,11 @@ set -uo pipefail
 # error the original payload is emitted unchanged (a hook must never fail the
 # session).
 #
-# Goose 1.49.0 fires exactly four Open Plugins events to a plugin's hooks.json:
-# SessionStart, UserPromptSubmit, Stop, SessionEnd. The tool-level events
-# (PreToolUse/PostToolUse/PostToolUseFailure) are enum variants that are not
-# dispatched to plugins in 1.49.0, so there is nothing to normalize for them.
+# Goose 1.50.0 dispatches these events to a plugin's hooks.json: SessionStart,
+# SessionEnd, UserPromptSubmit, Stop, and (restored on the normal execution
+# path in 1.50) PreToolUse / PostToolUse / PostToolUseFailure. Tool events carry
+# session_id / tool_call_id / tool_name / tool_input / working_dir — never the
+# tool result, so none is synthesized.
 
 EVENT="${1:-}"
 INPUT="$(cat 2>/dev/null || true)"
@@ -31,6 +32,31 @@ case "$EVENT" in
     printf '%s' "$INPUT" | jq -c '
       (.last_assistant_message // "") as $m
       | . + (if $m == "" then {} else {assistant_message: $m} end)
+    ' 2>/dev/null || emit_raw
+    ;;
+
+  pre-tool-use|post-tool-use)
+    # tool_input is an object; the FSM wants it stringified plus the raw object.
+    printf '%s' "$INPUT" | jq -c '
+      (.tool_input // {}) as $ti
+      | . + {
+          tool_input: (if ($ti | type) == "string" then $ti else ($ti | tojson) end),
+          tool_input_json: $ti
+        }
+    ' 2>/dev/null || emit_raw
+    ;;
+
+  post-tool-use-failure)
+    # Relayed to the post-tool-use endpoint. Goose's PostToolUseFailure carries
+    # no error text, so synthesize a non-empty `error` — that is the signal the
+    # FSM needs to mark the call failed rather than succeeded (not tool output).
+    printf '%s' "$INPUT" | jq -c '
+      (.tool_input // {}) as $ti
+      | . + {
+          tool_input: (if ($ti | type) == "string" then $ti else ($ti | tojson) end),
+          tool_input_json: $ti,
+          error: (.error // "Goose reported the tool call failed")
+        }
     ' 2>/dev/null || emit_raw
     ;;
 

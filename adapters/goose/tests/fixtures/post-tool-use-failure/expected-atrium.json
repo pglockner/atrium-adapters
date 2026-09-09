@@ -1,0 +1,7 @@
+{
+  "session_id": "20260909_21",
+  "tool_name": "shell",
+  "tool_call_id": "tool_shell_zrTxADpxZbresdwQD8EI",
+  "tool_input": "{\"command\":\"nonexistent_cmd_xyz_should_fail\"}",
+  "error": "Goose reported the tool call failed"
+}

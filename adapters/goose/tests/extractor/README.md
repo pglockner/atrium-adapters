@@ -1,6 +1,6 @@
 # goose extractor fixture
 
-`fixture.sql` builds a sanitized Goose 1.49.0 `sessions.db` (synthetic data —
+`fixture.sql` builds a sanitized Goose 1.50.0 `sessions.db` (synthetic data —
 no real transcripts). `assert.sh` builds it in a temp dir, runs
 `extract_session.py --depth deep` against it, and checks the review-point-5
 behaviours:

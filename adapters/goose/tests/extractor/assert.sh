@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Runs extract_session.py against a sanitized Goose 1.49.0 fixture DB and
+# Runs extract_session.py against a sanitized Goose 1.50.0 fixture DB and
 # checks the behaviours review point 5 called out:
 #   - the 1.48+ {"status","value":{...}} tool envelope is unwrapped
 #     (tool name + input are real, not "unknown"/{})
@@ -22,7 +22,7 @@ OUT="$(python3 "$EXTRACTOR" --db "${TMPD}/sessions.db" --session-id "$SID" --cwd
 fail() { echo "extractor.assert: $1" >&2; echo "--- output ---" >&2; echo "$OUT" >&2; exit 1; }
 
 echo "$OUT" | jq -e 'select(.type=="tool_use" and .tool=="shell") | .input.command == "ls -1"' >/dev/null \
-  || fail "shell tool_use missing real input (1.49 .value envelope not unwrapped)"
+  || fail "shell tool_use missing real input (1.48+ .value envelope not unwrapped)"
 
 echo "$OUT" | jq -e 'select(.type=="tool_use") | select(.tool=="unknown")' >/dev/null \
   && fail "a tool_use was emitted with tool=unknown" || true

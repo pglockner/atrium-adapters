@@ -23,7 +23,7 @@ command -v jq >/dev/null 2>&1 || {
 GOOSE_BIN="$(command -v goose 2>/dev/null || true)"
 [ -n "$GOOSE_BIN" ] || json_error "goose not found"
 
-# `goose --version` prints a bare semver on a single line (e.g. "1.47.0"),
+# `goose --version` prints a bare semver on a single line (e.g. "1.50.0"),
 # so the version is the first field — not the third.
 installed_version="$("$GOOSE_BIN" --version 2>/dev/null | head -n 1 | awk '{print $1}')"
 installed_version="${installed_version#v}"
