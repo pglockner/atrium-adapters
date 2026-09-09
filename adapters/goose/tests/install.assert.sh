@@ -7,10 +7,10 @@ set -euo pipefail
 # correctly: hooks.json wires every event Goose 1.50.0 dispatches to a plugin
 # (SessionStart/SessionEnd/UserPromptSubmit/Stop plus the restored
 # PreToolUse/PostToolUse/PostToolUseFailure) at the committed goose-hook.sh,
-# which resolves the atrium instance from ATRIUM_DATA_DIR and relays the
-# normalized payload to atrium's hook server. Also checks that a global
-# absolute GOOSE_PATH_ROOT redirects the plugin install to Goose's rooted
-# plugin dir.
+# which normalizes the payload and relays it through `atrium hook emit
+# --pane-id` so the event is stored against the originating pane. Also checks
+# that a global absolute GOOSE_PATH_ROOT redirects the plugin install to
+# Goose's rooted plugin dir.
 
 ADAPTER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 HOOKS_SH="${ADAPTER_DIR}/hooks.sh"
@@ -49,14 +49,21 @@ for f in "$HOOK_SCRIPT" "$NORMALIZER"; do
   fi
 done
 
-# The relay must resolve the port from the pane's own atrium instance.
-if ! grep -q 'ATRIUM_DATA_DIR:-$HOME/.atrium' "$HOOK_SCRIPT"; then
-  echo "install.assert: $HOOK_SCRIPT does not resolve hook-port via ATRIUM_DATA_DIR" >&2
+# The relay must emit through the atrium CLI with the pane id, so the event is
+# stored against the originating pane (not dropped as pane "unknown").
+if ! grep -q 'hook emit' "$HOOK_SCRIPT"; then
+  echo "install.assert: $HOOK_SCRIPT does not emit via 'atrium hook emit'" >&2
   exit 1
 fi
 
-if ! grep -q '/api/adapter/goose/' "$HOOK_SCRIPT"; then
-  echo "install.assert: $HOOK_SCRIPT does not POST to the goose adapter endpoint" >&2
+if ! grep -q -- '--pane-id "\$ATRIUM_PANE_ID"' "$HOOK_SCRIPT"; then
+  echo "install.assert: $HOOK_SCRIPT does not pass --pane-id \"\$ATRIUM_PANE_ID\"" >&2
+  exit 1
+fi
+
+# It must stay inert outside an atrium pane and inside a chat pane.
+if ! grep -q 'ATRIUM_PANE_ID:-' "$HOOK_SCRIPT" || ! grep -q 'ATRIUM_CHAT_SDK_HOOKS:-' "$HOOK_SCRIPT"; then
+  echo "install.assert: $HOOK_SCRIPT missing ATRIUM_PANE_ID / ATRIUM_CHAT_SDK_HOOKS guards" >&2
   exit 1
 fi
 

@@ -89,6 +89,9 @@ jobs:
       - name: Validate goose extractor against a 1.50 fixture
         run: bash adapters/goose/tests/extractor/assert.sh
 
+      - name: Validate goose hook relay (fold + pane id)
+        run: bash adapters/goose/tests/relay.assert.sh
+
       - name: Validate Hermes transcript recovery
         run: python3 -m unittest discover -s adapters/hermes/tests -p '*_test.py'
 
