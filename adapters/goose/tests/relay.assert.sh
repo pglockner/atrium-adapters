@@ -52,11 +52,14 @@ reset_cap() { rm -f "$CAP_ARGV" "$CAP_STDIN"; }
 argv_at() { [ -f "$CAP_ARGV" ] && tr '\0' '\n' < "$CAP_ARGV" | sed -n "${1}p"; }
 argv_joined() { [ -f "$CAP_ARGV" ] && tr '\0' ' ' < "$CAP_ARGV"; }
 
-# This test may run inside an atrium pane, which exports ATRIUM_PANE_ID and
-# ATRIUM_CHAT_SDK_HOOKS — scrub the whole ATRIUM_* namespace so each case sets
-# exactly the vars it means to.
+# This test may run inside an atrium pane, which exports the vars below — clear
+# every one that could steer the relay or the CLI so each case sets exactly what
+# it means to. ATRIUM_SOCKET matters most: socket routing outranks the CLI binary
+# name, so an inherited socket would send `hook emit` to the spawning instance
+# while the Part 2 readback hits a different instance's HTTP port.
 SCRUB=(env -u ATRIUM_PANE_ID -u ATRIUM_CHAT_SDK_HOOKS -u ATRIUM_CLI_PATH
-       -u ATRIUM_DATA_DIR -u ATRIUM_HOOK_PORT -u ATRIUM_ADAPTER_NAME)
+       -u ATRIUM_DATA_DIR -u ATRIUM_HOOK_PORT -u ATRIUM_ADAPTER_NAME
+       -u ATRIUM_SOCKET)
 
 run_hook() { # <norm-event> <atrium-event> <fixture-dir>
   reset_cap
@@ -115,13 +118,21 @@ reset_cap
 { [ ! -f "$CAP_ARGV" ] && ok "chat pane: relay is inert (ACP turn bridge owns activity)"; } \
   || bad "E: relay double-fed a chat pane"
 
-# ── Part 2: live tail against ~/.atrium-dev, if present ──
-DEV_PORT_FILE="${HOME}/.atrium-dev/hook-port"
-DEV_CLI="${HOME}/.atrium-dev/bin/atrium-dev"
-if [ "$FAILS" -eq 0 ] && [ -f "$DEV_PORT_FILE" ] && [ -x "$DEV_CLI" ]; then
-  PORT="$(cat "$DEV_PORT_FILE")"
+# ── Part 2: live tail against ONE real atrium instance, if one is resolvable ──
+# Bind the emit and the readback to a single data dir so they cannot land on
+# different instances: SCRUB clears the inherited ATRIUM_SOCKET, and we pass
+# ATRIUM_DATA_DIR explicitly so the CLI derives that instance's socket. Override
+# ATRIUM_RELAY_LIVE_DATA_DIR to point at a linked-worktree instance.
+LIVE_DIR="${ATRIUM_RELAY_LIVE_DATA_DIR:-${HOME}/.atrium-dev}"
+case "$(basename "$LIVE_DIR")" in
+  .atrium-dev*) LIVE_CLI="${LIVE_DIR}/bin/atrium-dev" ;;
+  *)            LIVE_CLI="${LIVE_DIR}/bin/atrium" ;;
+esac
+LIVE_PORT_FILE="${LIVE_DIR}/hook-port"
+if [ "$FAILS" -eq 0 ] && [ -f "$LIVE_PORT_FILE" ] && [ -x "$LIVE_CLI" ]; then
+  PORT="$(cat "$LIVE_PORT_FILE")"
   PANE="relay-live-$$"
-  "${SCRUB[@]}" ATRIUM_CLI_PATH="$DEV_CLI" ATRIUM_PANE_ID="$PANE" \
+  "${SCRUB[@]}" ATRIUM_DATA_DIR="$LIVE_DIR" ATRIUM_CLI_PATH="$LIVE_CLI" ATRIUM_PANE_ID="$PANE" \
     "$HOOK" post-tool-use-failure post-tool-use < "$FIX/post-tool-use-failure/tool-input.json"
   sleep 0.3
   state="$(curl -sS -X POST "http://127.0.0.1:${PORT}/resolve" \
@@ -136,7 +147,7 @@ if [ "$FAILS" -eq 0 ] && [ -f "$DEV_PORT_FILE" ] && [ -x "$DEV_CLI" ]; then
     bad "live: emit did not land a post-tool-use with an error under pane $PANE ($state)"
   fi
 else
-  printf '[SKIP] live tail (no ~/.atrium-dev hook server)\n'
+  printf '[SKIP] live tail (no atrium hook server under %s)\n' "$LIVE_DIR"
 fi
 
 if [ "$FAILS" -gt 0 ]; then
