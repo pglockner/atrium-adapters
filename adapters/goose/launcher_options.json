@@ -1,0 +1,61 @@
+{
+  "options": [
+    {
+      "key": "model",
+      "label": "model",
+      "description": "Optional. An exact Goose model id for this session (e.g. anthropic/claude-sonnet-4, qwen/qwen3-coder). Leave blank to let Goose resolve its own configured model; atrium cannot enumerate per-provider models, so there is no menu — switch models in-session with /model.",
+      "type": "text",
+      "default": ""
+    },
+    {
+      "key": "provider",
+      "label": "provider",
+      "description": "Optional. Overrides goose's configured provider for this session (e.g. openrouter, anthropic). Leave blank to inherit goose's config.",
+      "type": "text",
+      "default": ""
+    },
+    {
+      "key": "effort",
+      "label": "effort",
+      "description": "Optional reasoning effort. Leave blank to inherit (Goose applies the configured / provider / model behavior). Supported levels depend on the active model; an unsupported level makes Goose refuse to start the session. Also changeable in-session, or via GOOSE_THINKING_EFFORT.",
+      "type": "select",
+      "default": "",
+      "choices": [
+        "off",
+        "low",
+        "medium",
+        "high",
+        "max"
+      ]
+    },
+    {
+      "key": "extraArgs",
+      "label": "args",
+      "description": "Additional CLI arguments",
+      "type": "text",
+      "default": ""
+    }
+  ],
+  "suggestedFlags": [
+    {
+      "flag": "--provider",
+      "description": "Override the GOOSE_PROVIDER environment variable"
+    },
+    {
+      "flag": "--model",
+      "description": "Override the GOOSE_MODEL environment variable"
+    },
+    {
+      "flag": "--with-builtin",
+      "description": "Add bundled builtin extensions, comma-separated"
+    },
+    {
+      "flag": "--max-turns",
+      "description": "Limit agent turns before prompting for input"
+    },
+    {
+      "flag": "--debug",
+      "description": "Show complete tool responses without truncation"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "event": "PostToolUse",
+  "session_id": "20260909_21",
+  "matcher_context": "shell",
+  "tool_call_id": "tool_shell_6gUqXnE24NHBnmGXVrWy",
+  "tool_name": "shell",
+  "tool_input": { "command": "echo GOOD-CALL" },
+  "working_dir": "/tmp/project"
+}

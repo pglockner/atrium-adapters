@@ -1,0 +1,6 @@
+{
+  "event": "UserPromptSubmit",
+  "session_id": "20260908_1",
+  "matcher_context": "Summarize the README.",
+  "message": "Summarize the README."
+}

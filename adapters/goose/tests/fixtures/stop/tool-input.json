@@ -1,0 +1,7 @@
+{
+  "event": "Stop",
+  "session_id": "20260908_1",
+  "matcher_context": null,
+  "last_assistant_message": "Output: `hello-from-goose`",
+  "working_dir": "/tmp/project"
+}

@@ -235,7 +235,7 @@ Builds the command array to start a new session.
 
 **Args:** `$1` = flags JSON | **Output:** `{"command": ["mytool", "--flag"]}` | **Exit:** 0 = success, 1 = cannot build
 
-Flags JSON keys: `dangerouslySkipPermissions` (boolean), `worktreePath` (string or null), `extra` (object -- adapter-specific flags from launcher_options).
+Flags JSON keys: `dangerouslySkipPermissions` (boolean), `worktreePath` (string or null), plus every `launcher_options` option `key` as a **top-level** field (e.g. `model`, `provider`, `effort`, `extraArgs`) — the script receives the frontend's raw top-level JSON, not a nested `extra` object.
 
 ---
 
@@ -445,6 +445,7 @@ without a relaunch, and **without any version bump**:
 | [opencode](adapters/opencode/) | Open-source AI coding agent built for the terminal | `opencode` | Official |
 | [pi](adapters/pi/) | Minimal terminal coding agent by Mario Zechner | `pi` | Official |
 | [cursor-agent](adapters/cursor-agent/) | Cursor's agent CLI | `cursor-agent` | Official |
+| [goose](adapters/goose/) | Block's open-source AI agent CLI (BYOK, OpenRouter and 20+ providers) | `goose` | Community |
 
 ---
 

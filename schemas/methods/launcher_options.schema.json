@@ -14,7 +14,7 @@
           "key": {
             "type": "string",
             "minLength": 1,
-            "description": "Unique key for this option, maps to AdapterFlags.extra."
+            "description": "Unique key for this option. Passed to build_launch_command / build_resume_command as a top-level field of the flags JSON."
           },
           "label": {
             "type": "string",

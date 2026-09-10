@@ -70,6 +70,22 @@ assert_command \
   fi
 }
 
+# goose resume deliberately does NOT re-apply --provider/--model, even when the
+# launch-profile flags carry them: Goose restores the session's persisted
+# provider_name/model_config, and re-appending the launch-time values would
+# clobber an in-session /model change. effort (no persisted field) and
+# extraArgs are still carried forward.
+assert_command \
+  "goose" \
+  '{"model":"qwen/qwen3-coder","provider":"openrouter","effort":"medium","extraArgs":"--max-turns 3"}' \
+  '["env","GOOSE_THINKING_EFFORT=medium","goose","session","--resume","--session-id","sess-123","--max-turns","3"]'
+
+# Bare resume when no effort/extraArgs are set — no stale model/provider leaks in.
+assert_command \
+  "goose" \
+  '{"model":"qwen/qwen3-coder","provider":"openrouter"}' \
+  '["goose","session","--resume","--session-id","sess-123"]'
+
 assert_command \
   "hermes" \
   '{"dangerouslySkipPermissions":true,"model":"anthropic/claude","provider":"openrouter","extraArgs":"--max-turns 3"}' \
